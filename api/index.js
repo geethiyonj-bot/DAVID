@@ -1,146 +1,352 @@
-"use strict";
+const crypto = require("crypto");
 
-/*
-  DAVID_AI BACKEND
-  Vercel Serverless Function
-  Path: /api
-*/
+const MODEL = process.env.OPENAI_MODEL || "gpt-6-astra";
+const MAX_BODY = 10 * 1024 * 1024;
+const rate = new Map();
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-6-luna";
-const OPENAI_URL = "https://api.openai.com/v1/responses";
-
-const MAX_BODY = 16000;
-const MAX_PROMPT = 8000;
-const MAX_STATE = 14000;
-
-const DEPARTMENTS = {
+const LIBRARY = {
   CSE: [
-    "CPU","GPU","RAM","ROM","Microcontroller","Microprocessor","FPGA",
-    "PLC","Network Switch","Router","Wi-Fi Module","Bluetooth Module",
-    "Sensor Node","Database Node","AI Accelerator","Camera Module",
-    "SSD","HDD","Display","Keyboard","Mouse","Servo Controller",
-    "Motor Controller","Embedded Controller","Ethernet Module","USB Module",
-    "Raspberry Pi","Development Board","Logic Controller",
-    "Power Supply Module"
+    "Microcontroller",
+    "Microprocessor",
+    "CPU",
+    "GPU",
+    "FPGA",
+    "PLC",
+    "RAM",
+    "ROM",
+    "SSD",
+    "Camera Module",
+    "AI Accelerator",
+    "Wi-Fi Module",
+    "Bluetooth Module",
+    "Sensor Node",
+    "Display",
+    "Servo Controller"
   ],
 
   EEE: [
-    "Battery","DC Motor","AC Motor","Generator","Transformer","Relay",
-    "Contactor","Switch","Fuse","Resistor","Potentiometer","Capacitor",
-    "Inductor","Diode","Zener Diode","LED","Bridge Rectifier",
-    "Voltage Regulator","Current Sensor","Voltage Sensor","Power Supply",
-    "Inverter","Rectifier","Motor Driver","Solenoid","Electromagnetic Coil",
-    "Ground","Bus Bar"
+    "Resistor",
+    "Potentiometer",
+    "Thermistor",
+    "Capacitor",
+    "Electrolytic Capacitor",
+    "Ceramic Capacitor",
+    "Inductor",
+    "Transformer",
+    "Diode",
+    "Zener Diode",
+    "Schottky Diode",
+    "LED",
+    "BJT",
+    "MOSFET",
+    "IGBT",
+    "Relay",
+    "Contactor",
+    "Op-Amp",
+    "Motor",
+    "DC Motor",
+    "BLDC Motor",
+    "Stepper Motor",
+    "Generator",
+    "Alternator",
+    "Battery",
+    "Power Supply",
+    "Fuse",
+    "Circuit Breaker",
+    "Current Sensor",
+    "Voltage Sensor"
   ],
 
   ECE: [
-    "AND Gate","OR Gate","NOT Gate","NAND Gate","NOR Gate","XOR Gate",
-    "XNOR Gate","Flip Flop","Counter","ADC","DAC","Op Amp","Comparator",
-    "555 Timer","UART","SPI","I2C","CAN Bus","Ethernet","RF Module",
-    "GPS Module","Bluetooth Module","Wi-Fi Module","Antenna","Oscillator",
-    "Crystal","PLL","PCB","Signal Generator","Oscilloscope"
+    "AND Gate",
+    "OR Gate",
+    "NOT Gate",
+    "NAND Gate",
+    "NOR Gate",
+    "XOR Gate",
+    "Flip-Flop",
+    "Counter",
+    "Register",
+    "Multiplexer",
+    "ADC",
+    "DAC",
+    "Comparator",
+    "Oscillator",
+    "Crystal",
+    "Antenna",
+    "RF Module",
+    "PLL",
+    "PCB",
+    "Transceiver",
+    "UART",
+    "SPI",
+    "I2C",
+    "CAN",
+    "Ethernet"
   ],
 
   FT: [
-    "Food Mixer","Conveyor","Heating Chamber","Cooling Chamber",
-    "Temperature Sensor","Pressure Sensor","Flow Sensor","Level Sensor",
-    "Pump","Valve","Filter","Reactor","Storage Tank","Feeder","Dryer",
-    "Blender","Separator","Packaging Unit","Heat Exchanger",
-    "Process Controller"
+    "Pump",
+    "Valve",
+    "Pipe",
+    "Reservoir",
+    "Heat Exchanger",
+    "Flow Meter",
+    "Pressure Sensor",
+    "Nozzle",
+    "Mixer",
+    "Filter",
+    "Reactor",
+    "Condenser",
+    "Compressor",
+    "Tank"
   ],
 
   CIVIL: [
-    "Beam","Column","Slab","Foundation","Footing","Wall","Road","Bridge",
-    "Tunnel","Pipeline","Water Tank","Drainage Pipe","Manhole",
-    "Valve Chamber","Retaining Wall","Dam","Canal","Tower","Building",
-    "Staircase","Elevator Shaft","Steel Reinforcement","Concrete Block",
-    "Survey Point"
+    "Beam",
+    "Column",
+    "Slab",
+    "Foundation",
+    "Footing",
+    "Bridge Joint",
+    "Road",
+    "Pipeline",
+    "Water Tank",
+    "Dam",
+    "Crane",
+    "Concrete Block",
+    "Rebar",
+    "Truss",
+    "Girder",
+    "Tunnel",
+    "Drainage",
+    "Manhole",
+    "Sewer",
+    "Retaining Wall",
+    "Pile"
   ],
 
   MECH: [
-    "Engine","Gear","Gearbox","Shaft","Bearing","Coupling","Pulley",
-    "Belt","Chain","Sprocket","Flywheel","Piston","Cylinder","Crankshaft",
-    "Cam","Spring","Damper","Pump","Compressor","Fan","Impeller",
-    "Heat Exchanger","Mechanical Joint","Frame","Chassis"
+    "Gear",
+    "Shaft",
+    "Bearing",
+    "Spring",
+    "Damper",
+    "Piston",
+    "Cylinder",
+    "Hydraulic Cylinder",
+    "Pump",
+    "Compressor",
+    "Turbine",
+    "Fan",
+    "Flywheel",
+    "Brake",
+    "Clutch",
+    "Coupling",
+    "Pulley",
+    "Belt",
+    "Chain",
+    "Actuator",
+    "Linear Actuator",
+    "Robot Arm",
+    "Gripper",
+    "Frame",
+    "Chassis",
+    "Heat Sink",
+    "Heat Exchanger"
   ],
 
   AUTOMOBILE: [
-    "Engine","Transmission","Clutch","Differential","Drive Shaft","Axle",
-    "Wheel","Tire","Brake","Brake Disc","Brake Caliper","Steering",
-    "Suspension","Shock Absorber","Radiator","Fuel Tank","Fuel Pump",
-    "Alternator","Starter Motor","ECU","ABS Controller","Airbag",
-    "Battery","Electric Motor","EV Controller","Charging Port"
+    "Engine",
+    "Transmission",
+    "Differential",
+    "Wheel",
+    "Tire",
+    "Brake",
+    "Suspension",
+    "Radiator",
+    "Fuel Tank",
+    "Battery",
+    "ECU",
+    "Alternator",
+    "Starter Motor",
+    "Exhaust",
+    "Catalytic Converter",
+    "Steering Rack",
+    "Air Filter",
+    "Fuel Injector",
+    "Turbocharger",
+    "Intercooler",
+    "Clutch",
+    "Drive Shaft",
+    "Chassis",
+    "ABS Sensor",
+    "Oxygen Sensor"
   ],
 
   AEROSPACE: [
-    "Aircraft Engine","Jet Turbine","Propeller","Wing","Fuselage","Tail",
-    "Rudder","Elevator","Aileron","Landing Gear","Brake System",
-    "Fuel Tank","Fuel Pump","Avionics","Flight Controller","GPS","Radar",
-    "Communication Module","Navigation System","Pitot Tube","Cabin",
-    "Actuator","Hydraulic System","Control Surface"
+    "Airframe",
+    "Wing",
+    "Aileron",
+    "Elevator",
+    "Rudder",
+    "Flap",
+    "Slat",
+    "Jet Engine",
+    "Turbofan",
+    "Fuel Tank",
+    "Landing Gear",
+    "Avionics",
+    "Radar",
+    "Propeller",
+    "Flight Computer",
+    "GPS",
+    "IMU",
+    "Pitot Tube",
+    "Cabin",
+    "Payload Bay",
+    "Control Surface"
   ],
 
   SPACECRAFT: [
-    "Rocket Engine","Fuel Tank","Oxidizer Tank","Rocket Body","Payload",
-    "Satellite","Solar Panel","Battery","Reaction Wheel","Gyroscope",
-    "Star Tracker","GPS Receiver","Telemetry Module","Communication Antenna",
-    "Flight Computer","Thruster","Docking Port","Heat Shield","Parachute",
-    "Landing Module","Orbital Sensor","Navigation Unit"
+    "Payload",
+    "Solar Array",
+    "Battery",
+    "Thruster",
+    "Reaction Wheel",
+    "Star Tracker",
+    "Telemetry",
+    "Antenna",
+    "Fuel Tank",
+    "Docking Port",
+    "Flight Computer",
+    "IMU",
+    "Thermal Radiator",
+    "Heat Shield",
+    "Structure",
+    "Propulsion Module"
   ],
 
   FLUID: [
-    "Pump","Pipe","Valve","Tank","Reservoir","Flow Meter","Pressure Gauge",
-    "Pressure Sensor","Flow Sensor","Filter","Compressor",
-    "Hydraulic Cylinder","Hydraulic Motor","Manifold","Nozzle","Vent",
-    "Heat Exchanger","Fluid Controller"
+    "Pipe",
+    "Pump",
+    "Valve",
+    "Check Valve",
+    "Pressure Regulator",
+    "Reservoir",
+    "Tank",
+    "Nozzle",
+    "Venturi",
+    "Flow Meter",
+    "Pressure Sensor",
+    "Filter",
+    "Heat Exchanger",
+    "Compressor",
+    "Turbine"
   ],
 
   SCIENCE: [
-    "Particle","Mass","Force","Velocity","Acceleration","Spring","Pendulum",
-    "Magnet","Electric Field","Magnetic Field","Light Source","Lens",
-    "Mirror","Prism","Wave Generator","Detector","Sensor","Thermometer",
-    "Pressure Chamber","Vacuum Chamber"
+    "Mass",
+    "Spring",
+    "Pendulum",
+    "Magnet",
+    "Electroscope",
+    "Heat Source",
+    "Lens",
+    "Prism",
+    "Particle Source",
+    "Light Source",
+    "Thermometer",
+    "Pressure Gauge",
+    "Force Sensor",
+    "Motion Sensor",
+    "Oscilloscope"
   ],
 
   CHEMISTRY: [
-    "Atom","Molecule","Reaction Vessel","Beaker","Flask","Test Tube",
-    "Distillation Column","Separator","Reactor","Filter","Pump","Valve",
-    "Chemical Tank","Heat Source","Cooler","pH Sensor",
-    "Temperature Sensor","Pressure Sensor","Flow Sensor","Catalyst"
+    "Reactor",
+    "Mixer",
+    "Beaker",
+    "Flask",
+    "Heat Bath",
+    "Condenser",
+    "Distillation Column",
+    "pH Sensor",
+    "Gas Line",
+    "Valve",
+    "Filter",
+    "Separator",
+    "Pump",
+    "Temperature Probe",
+    "Pressure Vessel"
   ],
 
   BIOLOGY: [
-    "Cell","Nucleus","DNA","RNA","Protein","Enzyme","Membrane","Microscope",
-    "Incubator","Culture Chamber","Bio Reactor","Sensor","Sample Holder",
-    "Fluid Chamber","Pump","Filter","Temperature Controller",
-    "Imaging Module"
+    "Cell Model",
+    "Incubator",
+    "Microscope",
+    "Culture Vessel",
+    "Sensor",
+    "Pump",
+    "Filter",
+    "Centrifuge",
+    "Petri Dish",
+    "DNA Model",
+    "Bioreactor",
+    "Flow Chamber"
   ],
 
   NANOTECH: [
-    "Nano Sensor","Nano Wire","Nano Tube","Graphene Sheet","Quantum Dot",
-    "Nano Particle","Nano Motor","Nano Robot","Nano Material",
-    "Nano Electrode","Nano Membrane","Nano Transistor","Nano Battery",
-    "Nano Catalyst"
+    "Nanowire",
+    "Nanotube",
+    "Thin Film",
+    "MEMS Sensor",
+    "Nanoelectrode",
+    "Microfluidic Channel",
+    "Nanoparticle Source",
+    "AFM Tip",
+    "Nanoheater",
+    "Graphene Sheet"
   ],
 
   QUANTUM: [
-    "Qubit","Quantum Gate","Quantum Register","Quantum Sensor",
-    "Quantum Processor","Quantum Memory","Photon Source","Photon Detector",
-    "Superconducting Circuit","Quantum Interconnect","Quantum Controller",
-    "Quantum Measurement"
+    "Qubit",
+    "Quantum Gate",
+    "Hadamard Gate",
+    "CNOT Gate",
+    "Cryogenic Stage",
+    "Photon Source",
+    "Detector",
+    "Readout",
+    "Quantum Register",
+    "Superconducting Loop"
   ],
 
   ROBOTICS: [
-    "Robot Base","Robot Arm","Servo Motor","Stepper Motor","Motor Driver",
-    "Encoder","IMU","Camera","LiDAR","Ultrasonic Sensor","Force Sensor",
-    "Gripper","Manipulator","Controller","Battery","Wireless Module",
-    "Navigation Module","Obstacle Sensor"
+    "Robot Base",
+    "Servo",
+    "Joint",
+    "Encoder",
+    "IMU",
+    "LiDAR",
+    "Depth Camera",
+    "Gripper",
+    "Controller",
+    "Motor Driver",
+    "Force Sensor"
   ],
 
   RENEWABLE: [
-    "Solar Panel","Wind Turbine","Generator","Battery","Inverter",
-    "Charge Controller","Hydro Turbine","Hydro Generator","Biogas Reactor",
-    "Fuel Cell","Energy Storage","Power Controller","Smart Meter"
+    "Solar Cell",
+    "PV Array",
+    "Wind Turbine",
+    "Generator",
+    "Inverter",
+    "Battery Bank",
+    "Charge Controller",
+    "Hydrogen Tank",
+    "Fuel Cell",
+    "Electrolyzer"
   ]
 };
 
@@ -153,27 +359,35 @@ const ACTION_TYPES = [
   "disconnect",
   "split",
   "fix",
-  "duplicate",
-  "align",
-  "measure",
+  "run",
+  "check",
+  "showall",
   "zoom",
   "pan",
   "center",
-  "showall",
-  "check",
-  "run",
-  "reset"
+  "duplicate",
+  "align",
+  "measure",
+  "reset",
+  "color"
 ];
 
 const ACTION_SCHEMA = {
   type: "object",
   additionalProperties: false,
+
   properties: {
+    reply: {
+      type: "string"
+    },
+
     actions: {
       type: "array",
+
       items: {
         type: "object",
         additionalProperties: false,
+
         properties: {
           type: {
             type: "string",
@@ -184,7 +398,7 @@ const ACTION_SCHEMA = {
             type: ["string", "null"]
           },
 
-          department: {
+          target: {
             type: ["string", "null"]
           },
 
@@ -192,7 +406,11 @@ const ACTION_SCHEMA = {
             type: ["string", "null"]
           },
 
-          target: {
+          department: {
+            type: ["string", "null"]
+          },
+
+          shape: {
             type: ["string", "null"]
           },
 
@@ -208,673 +426,636 @@ const ACTION_SCHEMA = {
             type: ["number", "null"]
           },
 
-          degrees: {
-            type: ["number", "null"]
-          },
-
-          factor: {
-            type: ["number", "null"]
-          },
-
           value: {
             type: ["number", "null"]
+          },
+
+          color: {
+            type: ["string", "null"]
           }
         },
 
         required: [
           "type",
           "name",
-          "department",
-          "source",
           "target",
+          "source",
+          "department",
+          "shape",
           "x",
           "y",
           "angle",
-          "degrees",
-          "factor",
           "value"
         ]
       }
-    },
-
-    reply: {
-      type: "string"
     }
   },
 
   required: [
-    "actions",
-    "reply"
+    "reply",
+    "actions"
   ]
 };
 
-const SYSTEM_PROMPT = `
-You are the engineering command interpreter for DAVID_AI.
+const SYSTEM = `
+You are DAVID_AI's engineering design control layer.
 
-Your job is to convert a user's natural-language engineering/design command
-into safe structured visual-engine actions.
+Convert natural-language, typed, or transcribed voice commands into deterministic visual design actions.
 
-The browser application contains a component library covering:
+You are not a CAD solver and must never claim physical verification.
 
-CSE, EEE, ECE, FT, CIVIL, MECH, AUTOMOBILE, AEROSPACE,
-SPACECRAFT, FLUID, SCIENCE, CHEMISTRY, BIOLOGY, NANOTECH,
-QUANTUM, ROBOTICS and RENEWABLE.
+The browser renders actual engineering-style symbols rather than generic component boxes.
 
-You MUST only use components that exist in the supplied library.
+For a new system, use realistic components from the library and connect them logically.
 
-IMPORTANT:
+If the user asks for components from multiple departments, include the requested departments and make explicit connections.
 
-1. Understand complete multi-step commands.
+For "connect X to Y", always emit a connect action with source and target.
 
-Example:
+For "connect the motor to the controller", use the exact component names you created.
 
-"Create a motor system with a battery, motor controller and DC motor,
-connect the battery to the controller and controller to the motor,
-then test it."
+For "import", treat it as add.
 
-Should become approximately:
+For "draw/model/create a car/engine/etc.", create a useful set of subsystem components and connections.
 
-add Battery
-add Motor Controller
-add DC Motor
-connect Battery -> Motor Controller
-connect Motor Controller -> DC Motor
-check
-run
+Allowed actions:
+${ACTION_TYPES.join(", ")}
 
-2. "import X" means add the component to the visual engine.
+Color:
+target/name identifies a component and color is a CSS hex colour such as #53c7ff.
 
-3. "add X" means add the component.
+For colour commands always emit a color action.
 
-4. "create X" means add the component.
+For split commands always emit split.
 
-5. "connect X to Y" means create a graph connection from X to Y.
+add:
+name is component name.
+department is library department.
+shape is an optional visual family such as motor, gear, shaft, battery, controller, pipe, pump, car, aircraft, beam, sensor, generic.
+x/y are canvas coordinates when useful.
 
-6. "connect it to Y" means use the most recently created/selected
-component as the source.
+connect:
+source and target are exact component names.
 
-7. "disconnect X from Y" removes the graph connection.
+The frontend also supports manual port-to-port and component-to-component connection.
 
-8. "remove X" removes X.
+remove:
+target/name identifies the component.
 
-9. "delete X" removes X.
+move/rotate/fix/split/duplicate:
+use target or name.
 
-10. "split X" splits the selected component. If X is not specified,
-split the selected component.
+split:
+creates editable child parts.
 
-11. "rotate X" rotates X. If no component is specified,
-rotate the selected component.
+check:
+validates the graph conceptually.
 
-12. "lock X" or "fix X" fixes the selected component.
+run:
+starts the conceptual simulation.
 
-13. "duplicate X" duplicates the component.
+reset:
+clears the model.
 
-14. "test", "check", or "validate" produces a conceptual structural check.
+showall/center:
+fit the model.
 
-15. "run" or "simulate" starts a conceptual simulation.
-
-16. "show all" or "fit view" centers the design.
-
-17. "zoom in" uses a factor greater than 1.
-
-18. "zoom out" uses a factor below 1.
-
-19. "measure X to Y" produces a visual distance measurement.
-
-20. "align" aligns the current model.
-
-21. Preserve command order.
-
-22. Multiple commands in one sentence must result in multiple actions.
-
-23. Do not invent physical measurements or claim real hardware validation.
-
-24. The browser performs the actual visual operations.
-You only return structured actions.
-
-25. Never return JavaScript.
-
-26. Never return HTML.
-
-27. Never return markdown.
-
-28. Return only the structured function result.
-
-29. If a component is ambiguous, choose the closest exact library
-component rather than inventing one.
-
-30. If the user asks for an entire subsystem, create the necessary
-library components and reasonable graph connections.
-
-31. Do not claim that a conceptual simulation proves a physical circuit,
-mechanical system, aircraft, automobile, civil structure or spacecraft
-will work in reality.
-
-32. Keep the reply short and describe what was done.
-
-The application state supplied by the browser represents the current
-editable visual model.
+Library:
+${JSON.stringify(LIBRARY)}
 `;
 
-function jsonResponse(res, status, data) {
+function json(res, status, payload) {
   res.statusCode = status;
-  res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.end(JSON.stringify(data));
-}
 
-function setSecurityHeaders(res) {
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("X-Frame-Options", "DENY");
-  res.setHeader("Referrer-Policy", "no-referrer");
-  res.setHeader(
-    "Permissions-Policy",
-    "camera=(self), microphone=(self), geolocation=()"
-  );
-  res.setHeader(
-    "Content-Security-Policy",
-    "default-src 'none'; frame-ancestors 'none'"
-  );
-}
-
-function getBody(req) {
-  return new Promise((resolve, reject) => {
-    let body = "";
-
-    req.on("data", chunk => {
-      body += chunk;
-
-      if (body.length > MAX_BODY) {
-        reject(new Error("Request too large"));
-        req.destroy();
-      }
-    });
-
-    req.on("end", () => {
-      resolve(body);
-    });
-
-    req.on("error", reject);
-  });
-}
-
-function cleanString(value, max = 8000) {
-  if (typeof value !== "string") return "";
-  return value.slice(0, max);
-}
-
-function sanitizeState(state) {
-  if (!state || typeof state !== "object") {
-    return {};
-  }
-
-  const copy = {
-    name: cleanString(state.name, 200),
-    selected: cleanString(state.selected, 200),
-    page: null
+  const headers = {
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": "no-store, no-cache, must-revalidate",
+    "pragma": "no-cache",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "referrer-policy": "no-referrer",
+    "permissions-policy": "camera=(self), microphone=(self)"
   };
 
-  if (state.page && typeof state.page === "object") {
-    copy.page = {
-      name: cleanString(state.page.name, 200),
-      nodes: Array.isArray(state.page.nodes)
-        ? state.page.nodes.slice(0, 300).map(n => ({
-            id: cleanString(n.id, 100),
-            name: cleanString(n.name, 200),
-            dept: cleanString(n.dept, 100),
-            x: Number.isFinite(Number(n.x))
-              ? Number(n.x)
-              : 0,
-            y: Number.isFinite(Number(n.y))
-              ? Number(n.y)
-              : 0,
-            r: Number.isFinite(Number(n.r))
-              ? Number(n.r)
-              : 0,
-            fixed: Boolean(n.fixed)
-          }))
-        : [],
-
-      links: Array.isArray(state.page.links)
-        ? state.page.links
-            .slice(0, 500)
-            .map(link => {
-              if (!Array.isArray(link)) return [];
-              return [
-                cleanString(link[0], 100),
-                cleanString(link[1], 100)
-              ];
-            })
-        : []
-    };
+  for (const [k, v] of Object.entries(headers)) {
+    res.setHeader(k, v);
   }
 
-  return copy;
+  res.end(JSON.stringify(payload));
 }
 
-function compactLibrary() {
-  return Object.entries(DEPARTMENTS)
-    .map(([department, components]) => ({
-      department,
-      components
-    }));
+function safeTimingEqual(a, b) {
+  const aa = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+
+  return (
+    aa.length === bb.length &&
+    crypto.timingSafeEqual(aa, bb)
+  );
 }
 
-function buildInput(prompt, state) {
-  return [
-    {
-      role: "user",
-      content: [
-        {
-          type: "input_text",
-          text:
-            "USER COMMAND:\n" +
-            prompt +
-            "\n\nCURRENT PROJECT STATE:\n" +
-            JSON.stringify(state) +
-            "\n\nAVAILABLE LIBRARY:\n" +
-            JSON.stringify(compactLibrary())
-        }
-      ]
-    }
-  ];
+function sessionSecret() {
+  const key = String(process.env.OPENAI_API_KEY || "");
+
+  return String(
+    process.env.DAVID_SESSION_SECRET ||
+    key ||
+    "david-local-session-secret"
+  );
 }
 
-function findOutputFunction(response) {
-  if (!response || !Array.isArray(response.output)) {
-    return null;
-  }
+function makeSession() {
+  const exp =
+    Math.floor(Date.now() / 1000) + 3600;
 
-  for (const item of response.output) {
-    if (
-      item &&
-      item.type === "function_call"
-    ) {
-      return item;
-    }
-  }
+  const payload = Buffer.from(
+    JSON.stringify({
+      v: 1,
+      exp
+    })
+  ).toString("base64url");
 
-  return null;
+  const sig = crypto
+    .createHmac(
+      "sha256",
+      sessionSecret()
+    )
+    .update(payload)
+    .digest("base64url");
+
+  return `${payload}.${sig}`;
 }
 
-function validateAction(action) {
-  if (!action || typeof action !== "object") {
+function validSession(req) {
+  const raw = String(
+    req.headers.cookie || ""
+  );
+
+  const m = raw.match(
+    /(?:^|;\s*)DAVID_SESSION=([^;]+)/
+  );
+
+  if (!m) {
     return false;
   }
 
-  if (!ACTION_TYPES.includes(action.type)) {
+  const [payload, sig] =
+    String(m[1]).split(".");
+
+  if (!payload || !sig) {
     return false;
   }
 
-  if (
-    action.name &&
-    typeof action.name !== "string"
-  ) {
+  const expected = crypto
+    .createHmac(
+      "sha256",
+      sessionSecret()
+    )
+    .update(payload)
+    .digest("base64url");
+
+  if (!safeTimingEqual(sig, expected)) {
     return false;
   }
-
-  if (
-    action.source &&
-    typeof action.source !== "string"
-  ) {
-    return false;
-  }
-
-  if (
-    action.target &&
-    typeof action.target !== "string"
-  ) {
-    return false;
-  }
-
-  return true;
-}
-
-function sanitizeActions(actions) {
-  if (!Array.isArray(actions)) {
-    return [];
-  }
-
-  return actions
-    .slice(0, 100)
-    .filter(validateAction)
-    .map(action => ({
-      type: action.type,
-
-      name:
-        typeof action.name === "string"
-          ? action.name.slice(0, 200)
-          : null,
-
-      department:
-        typeof action.department === "string"
-          ? action.department.slice(0, 100)
-          : null,
-
-      source:
-        typeof action.source === "string"
-          ? action.source.slice(0, 200)
-          : null,
-
-      target:
-        typeof action.target === "string"
-          ? action.target.slice(0, 200)
-          : null,
-
-      x:
-        Number.isFinite(Number(action.x))
-          ? Number(action.x)
-          : null,
-
-      y:
-        Number.isFinite(Number(action.y))
-          ? Number(action.y)
-          : null,
-
-      angle:
-        Number.isFinite(Number(action.angle))
-          ? Number(action.angle)
-          : null,
-
-      degrees:
-        Number.isFinite(Number(action.degrees))
-          ? Number(action.degrees)
-          : null,
-
-      factor:
-        Number.isFinite(Number(action.factor))
-          ? Number(action.factor)
-          : null,
-
-      value:
-        Number.isFinite(Number(action.value))
-          ? Number(action.value)
-          : null
-    }));
-}
-
-async function callOpenAI(prompt, state) {
-
-  const key = process.env.OPENAI_API_KEY;
-
-  if (!key) {
-    throw new Error(
-      "OPENAI_API_KEY is not configured"
-    );
-  }
-
-  const body = {
-    model: MODEL,
-
-    store: false,
-
-    instructions: SYSTEM_PROMPT,
-
-    input: buildInput(
-      prompt,
-      state
-    ),
-
-    tools: [
-      {
-        type: "function",
-
-        name: "design_actions",
-
-        description:
-          "Convert the engineering command into ordered visual design actions.",
-
-        strict: true,
-
-        parameters: ACTION_SCHEMA
-      }
-    ],
-
-    tool_choice: {
-      type: "function",
-      name: "design_actions"
-    }
-  };
-
-  const response =
-    await fetch(
-      OPENAI_URL,
-      {
-        method: "POST",
-
-        headers: {
-          "Authorization":
-            `Bearer ${key}`,
-
-          "Content-Type":
-            "application/json"
-        },
-
-        body: JSON.stringify(body)
-      }
-    );
-
-  const raw =
-    await response.text();
-
-  if (!response.ok) {
-
-    let message =
-      `OpenAI request failed (${response.status})`;
-
-    try {
-      const parsed =
-        JSON.parse(raw);
-
-      message =
-        parsed?.error?.message ||
-        message;
-    } catch (_) {}
-
-    throw new Error(message);
-  }
-
-  let data;
 
   try {
-    data=JSON.parse(raw);
-  } catch (_) {
-    throw new Error(
-      "Invalid response from AI service"
+    const d = JSON.parse(
+      Buffer.from(
+        payload,
+        "base64url"
+      ).toString("utf8")
     );
-  }
 
-  return data;
+    return (
+      Number(d.exp) >
+      Math.floor(Date.now() / 1000)
+    );
+  } catch {
+    return false;
+  }
 }
 
-async function handler(req, res) {
+function sameOrigin(req) {
+  const origin = String(
+    req.headers.origin || ""
+  );
 
-  setSecurityHeaders(res);
-
-  if (req.method === "OPTIONS") {
-    res.statusCode = 204;
-    res.end();
-    return;
+  if (!origin) {
+    return true;
   }
 
+  const host = String(
+    req.headers.host || ""
+  );
+
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
+function setSessionCookie(res, req) {
+  const secure =
+    String(
+      req.headers["x-forwarded-proto"] || ""
+    ).includes("https") ||
+    process.env.VERCEL === "1";
+
+  const parts = [
+    `DAVID_SESSION=${makeSession()}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Strict",
+    "Max-Age=3600"
+  ];
+
+  if (secure) {
+    parts.push("Secure");
+  }
+
+  res.setHeader(
+    "Set-Cookie",
+    parts.join("; ")
+  );
+}
+
+function rateOK(ip) {
+  const now = Date.now();
+  const old = rate.get(ip);
+
+  if (
+    !old ||
+    now - old.t > 60000
+  ) {
+    rate.set(ip, {
+      t: now,
+      n: 1
+    });
+
+    return true;
+  }
+
+  old.n++;
+
+  return old.n <= 30;
+}
+
+async function body(req) {
+  if (req.body) {
+    return typeof req.body === "string"
+      ? JSON.parse(req.body)
+      : req.body;
+  }
+
+  const chunks = [];
+  let size = 0;
+
+  for await (const c of req) {
+    size += c.length;
+
+    if (size > MAX_BODY) {
+      throw Error("Request too large");
+    }
+
+    chunks.push(c);
+  }
+
+  return JSON.parse(
+    Buffer.concat(chunks).toString("utf8")
+  );
+}
+
+module.exports = async (req, res) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; " +
+      "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data: blob:; " +
+      "connect-src 'self' https://api.openai.com https://cdn.jsdelivr.net https://storage.googleapis.com; " +
+      "worker-src 'self' blob:; " +
+      "media-src 'self' blob:; " +
+      "object-src 'none'; " +
+      "base-uri 'none'; " +
+      "frame-ancestors 'none'; " +
+      "form-action 'self'"
+  );
+
   if (req.method === "GET") {
+    setSessionCookie(res, req);
 
-    jsonResponse(
-      res,
-      200,
-      {
-        ok: true,
-        service: "DAVID_AI",
-        model: MODEL,
-        endpoint: "/api"
-      }
-    );
-
-    return;
+    return json(res, 200, {
+      ok: true,
+      service: "DAVID_AI",
+      privacy: "local-first",
+      remoteAI: "optional"
+    });
   }
 
   if (req.method !== "POST") {
-
-    jsonResponse(
-      res,
-      405,
-      {
-        error: "Method not allowed"
-      }
-    );
-
-    return;
+    return json(res, 405, {
+      error: "Method not allowed"
+    });
   }
+
+  if (!sameOrigin(req)) {
+    return json(res, 403, {
+      error: "Cross-origin request blocked."
+    });
+  }
+
+  if (!validSession(req)) {
+    return json(res, 403, {
+      error:
+        "Secure session required. Reload DAVID and try again."
+    });
+  }
+
+  const ip = String(
+    req.headers["x-forwarded-for"] ||
+      req.socket?.remoteAddress ||
+      "unknown"
+  )
+    .split(",")[0]
+    .trim();
+
+  if (!rateOK(ip)) {
+    return json(res, 429, {
+      error:
+        "Too many requests. Please wait a moment."
+    });
+  }
+
+  let b;
 
   try {
+    b = await body(req);
+  } catch (e) {
+    return json(res, 400, {
+      error:
+        e.message ||
+        "Invalid JSON"
+    });
+  }
 
-    const raw =
-      await getBody(req);
+  /*
+   * VOICE TRANSCRIPTION
+   */
 
-    let body;
+  if (b.audioBase64) {
+    const raw = String(
+      b.audioBase64
+    );
+
+    if (raw.length > 8500000) {
+      return json(res, 413, {
+        error:
+          "Audio recording is too large."
+      });
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return json(res, 503, {
+        error:
+          "OPENAI_API_KEY is not configured in this Vercel deployment."
+      });
+    }
 
     try {
-      body =
-        JSON.parse(raw);
-    } catch (_) {
-
-      jsonResponse(
-        res,
-        400,
-        {
-          error:
-            "Request body must be valid JSON"
-        }
-      );
-
-      return;
-    }
-
-    const prompt =
-      cleanString(
-        body.prompt,
-        MAX_PROMPT
-      ).trim();
-
-    if (!prompt) {
-
-      jsonResponse(
-        res,
-        400,
-        {
-          error:
-            "Prompt is required"
-        }
-      );
-
-      return;
-    }
-
-    const safeState =
-      sanitizeState(
-        body.state
-      );
-
-    const stateText =
-      JSON.stringify(safeState);
-
-    if (
-      stateText.length >
-      MAX_STATE
-    ) {
-
-      jsonResponse(
-        res,
-        400,
-        {
-          error:
-            "Project state is too large"
-        }
-      );
-
-      return;
-    }
-
-    const ai =
-      await callOpenAI(
-        prompt,
-        safeState
-      );
-
-    const functionCall =
-      findOutputFunction(ai);
-
-    if (!functionCall) {
-
-      jsonResponse(
-        res,
-        502,
-        {
-          error:
-            "AI did not return design actions"
-        }
-      );
-
-      return;
-    }
-
-    let parsed;
-
-    try {
-      parsed =
-        JSON.parse(
-          functionCall.arguments
+      const bytes =
+        Buffer.from(
+          raw,
+          "base64"
         );
-    } catch (_) {
 
-      jsonResponse(
-        res,
-        502,
-        {
+      const form =
+        new FormData();
+
+      form.append(
+        "file",
+        new Blob(
+          [bytes],
+          {
+            type: String(
+              b.audioType ||
+                "audio/webm"
+            )
+          }
+        ),
+        "voice.webm"
+      );
+
+      form.append(
+        "model",
+        process.env.OPENAI_TRANSCRIBE_MODEL ||
+          "gpt-transcribe"
+      );
+
+      form.append(
+        "response_format",
+        "json"
+      );
+
+      const rr =
+        await fetch(
+          "https://api.openai.com/v1/audio/transcriptions",
+          {
+            method: "POST",
+
+            headers: {
+              authorization:
+                `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+
+            body: form
+          }
+        );
+
+      const dd =
+        await rr
+          .json()
+          .catch(() => ({}));
+
+      if (!rr.ok) {
+        return json(res, 502, {
           error:
-            "AI returned invalid action JSON"
+            "Voice transcription service unavailable."
+        });
+      }
+
+      return json(res, 200, {
+        text: String(
+          dd.text || ""
+        )
+      });
+    } catch (e) {
+      return json(res, 500, {
+        error:
+          "Voice transcription failed."
+      });
+    }
+  }
+
+  /*
+   * AI DESIGN COMMAND
+   */
+
+  const prompt =
+    String(
+      b.prompt || ""
+    ).trim();
+
+  if (!prompt) {
+    return json(res, 400, {
+      error:
+        "Empty prompt"
+    });
+  }
+
+  if (prompt.length > 8000) {
+    return json(res, 413, {
+      error:
+        "Prompt too long"
+    });
+  }
+
+  if (!process.env.OPENAI_API_KEY) {
+    return json(res, 503, {
+      error:
+        "OPENAI_API_KEY is not configured in this Vercel deployment. Add it to this project and redeploy."
+    });
+  }
+
+  const state =
+    JSON.stringify(
+      b.state || {}
+    ).slice(0, 14000);
+
+  const input =
+    `CURRENT PROJECT STATE:\n${state}\n\nUSER COMMAND:\n${prompt}`;
+
+  try {
+    const r =
+      await fetch(
+        "https://api.openai.com/v1/responses",
+        {
+          method: "POST",
+
+          headers: {
+            authorization:
+              `Bearer ${process.env.OPENAI_API_KEY}`,
+
+            "content-type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            model: MODEL,
+
+            instructions:
+              SYSTEM,
+
+            input: [
+              {
+                role: "user",
+                content: input
+              }
+            ],
+
+            tools: [
+              {
+                type: "function",
+                name: "design_actions",
+                description:
+                  "Return the visual engineering actions required by the user's command.",
+
+                strict: true,
+
+                parameters:
+                  ACTION_SCHEMA
+              }
+            ],
+
+            tool_choice: {
+              type: "function",
+              name: "design_actions"
+            },
+
+            store: false,
+
+            max_output_tokens: 3000
+          })
         }
       );
 
-      return;
+    if (!r.ok) {
+      await r
+        .text()
+        .catch(() => "");
+
+      return json(res, 502, {
+        error:
+          "AI service unavailable."
+      });
     }
 
-    const actions =
-      sanitizeActions(
-        parsed.actions
-      );
+    const data =
+      await r.json();
 
-    const reply =
-      typeof parsed.reply === "string"
-        ? parsed.reply.slice(0,1000)
-        : "Command processed.";
+    const call =
+      (data.output || [])
+        .find(
+          x =>
+            x.type ===
+              "function_call" &&
+            x.name ===
+              "design_actions"
+        );
 
-    jsonResponse(
+    if (!call) {
+      return json(res, 200, {
+        reply:
+          data.output_text ||
+          "No design action was returned.",
+
+        actions: []
+      });
+    }
+
+    let out;
+
+    try {
+      out =
+        JSON.parse(
+          call.arguments
+        );
+    } catch {
+      return json(res, 502, {
+        error:
+          "AI returned invalid structured actions."
+      });
+    }
+
+    out.actions =
+      Array.isArray(
+        out.actions
+      )
+        ? out.actions.slice(
+            0,
+            80
+          )
+        : [];
+
+    return json(
       res,
       200,
-      {
-        ok: true,
-        reply,
-        actions
-      }
+      out
     );
-
-  } catch (error) {
-
-    console.error(
-      "DAVID_AI API ERROR:",
-      error
-    );
-
-    jsonResponse(
-      res,
-      500,
-      {
-        error:
-          error.message ||
-          "Internal server error"
-      }
-    );
+  } catch (e) {
+    return json(res, 500, {
+      error:
+        "Secure AI request failed."
+    });
   }
-}
-
-module.exports = handler;
+};
