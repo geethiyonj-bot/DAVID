@@ -1,353 +1,3684 @@
-from pathlib import Path
-
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>DAVID_AI — Innovation Command Center</title>
+<title>DAVID_AI — Engineering Innovation Command Center</title>
+
 <style>
+:root{
+  --bg:#05080d;
+  --panel:#09111a;
+  --panel2:#0d1823;
+  --line:#1b3043;
+  --cyan:#55e5ff;
+  --green:#58e6a3;
+  --yellow:#ffd166;
+  --red:#ff667d;
+  --text:#edf7ff;
+  --muted:#8196aa;
+}
+
 *{box-sizing:border-box}
-html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:Inter,Segoe UI,Arial,sans-serif;background:#030812;color:#dff7ff}
-body{background:
-radial-gradient(circle at 50% 45%,rgba(0,210,255,.10),transparent 24%),
-radial-gradient(circle at 15% 20%,rgba(60,80,255,.08),transparent 28%),
-linear-gradient(135deg,#02050b,#07101c 55%,#02060d)}
-button,input,textarea{font:inherit}
-button{cursor:pointer}
-.app{height:100vh;width:100vw;display:grid;grid-template-columns:82px 1fr;grid-template-rows:62px 1fr 78px;position:relative}
-.app:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(80,200,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(80,200,255,.025) 1px,transparent 1px);background-size:42px 42px}
-.top{grid-column:1/3;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid rgba(90,220,255,.2);background:rgba(2,8,18,.82);backdrop-filter:blur(16px);z-index:3}
-.brand{display:flex;align-items:center;gap:13px;font-weight:800;letter-spacing:3px;font-size:19px}.brandDot{width:29px;height:29px;border-radius:50%;border:1px solid #64e8ff;box-shadow:0 0 20px #00bfff inset,0 0 18px #00bfff;position:relative}.brandDot:after{content:"";position:absolute;inset:7px;border-radius:50%;background:#8ef4ff;box-shadow:0 0 13px #8ef4ff}
-.status{display:flex;align-items:center;gap:10px;color:#8faebe;font-size:12px}.led{width:8px;height:8px;border-radius:50%;background:#32f5a0;box-shadow:0 0 12px #32f5a0}.clock{font-variant-numeric:tabular-nums;color:#c9f6ff;margin-left:12px}
-.side{grid-row:2/4;display:flex;flex-direction:column;align-items:center;padding:12px 8px;border-right:1px solid rgba(90,220,255,.18);background:rgba(2,8,18,.72);z-index:3;gap:8px}
-.nav{width:62px;height:56px;border:1px solid transparent;background:transparent;color:#7291a3;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.2s}.nav span{font-size:19px}.nav small{font-size:8px;letter-spacing:.5px}.nav:hover,.nav.active{color:#d9fbff;border-color:rgba(53,220,255,.45);background:rgba(0,190,255,.08);box-shadow:0 0 18px rgba(0,190,255,.12)}
-.main{grid-column:2;grid-row:2;position:relative;min-width:0;min-height:0;padding:18px;z-index:2}
-.screen{height:100%;width:100%;display:none;min-height:0}.screen.active{display:grid}
-.home{grid-template-columns:270px minmax(360px,1fr) 290px;grid-template-rows:1fr;gap:16px}
-.panel{border:1px solid rgba(90,220,255,.19);background:linear-gradient(145deg,rgba(10,24,39,.78),rgba(2,10,20,.72));border-radius:18px;box-shadow:inset 0 0 35px rgba(0,180,255,.025),0 8px 30px rgba(0,0,0,.2);overflow:hidden;min-height:0}
-.panelHead{height:44px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(90,220,255,.12);color:#8bdff4;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
-.panelBody{padding:13px;overflow:hidden;height:calc(100% - 44px)}
-.item{padding:11px 12px;margin-bottom:8px;border:1px solid rgba(100,200,255,.11);border-radius:11px;background:rgba(0,110,160,.045);font-size:12px;color:#abc8d5}.item b{color:#e4fbff;display:block;margin-bottom:4px}.item span{font-size:10px;color:#66899a}
-.chip{display:inline-flex;padding:5px 8px;border-radius:20px;border:1px solid rgba(75,210,255,.22);color:#82d9ed;font-size:9px;margin:3px}
-.center{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}.core{width:min(32vw,330px);height:min(32vw,330px);border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
-.ring{position:absolute;border-radius:50%;border:1px solid rgba(70,225,255,.5);animation:spin 15s linear infinite}.r1{inset:0;box-shadow:0 0 50px rgba(0,200,255,.08)}.r2{inset:12%;border-style:dashed;animation-duration:10s;animation-direction:reverse}.r3{inset:23%;border-color:rgba(100,170,255,.3);animation-duration:7s}
-.orb{width:38%;height:38%;border-radius:50%;background:radial-gradient(circle,#d9ffff 0,#4beaff 12%,#00a9ef 38%,#073e65 65%,transparent 70%);box-shadow:0 0 25px #35e7ff,0 0 70px rgba(0,185,255,.55),0 0 130px rgba(0,130,255,.22);animation:pulse 2.5s ease-in-out infinite}
-.ray{position:absolute;width:46%;height:1px;background:linear-gradient(90deg,transparent,#54eaff,transparent);transform-origin:center}
-.ray.a{transform:rotate(20deg)}.ray.b{transform:rotate(110deg)}.ray.c{transform:rotate(200deg)}.ray.d{transform:rotate(290deg)}
-.coreLabel{position:absolute;bottom:18px;text-align:center;font-size:10px;letter-spacing:3px;color:#7bcfe1}.wake{position:absolute;top:18px;text-align:center;font-size:11px;color:#9bc7d6}.wake strong{color:#e4fcff}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.13);filter:brightness(1.25)}}
-.mic{position:absolute;bottom:12%;width:76px;height:76px;border-radius:50%;border:1px solid #61eaff;background:rgba(0,160,220,.09);color:#cfffff;box-shadow:0 0 25px rgba(0,220,255,.3),inset 0 0 18px rgba(0,220,255,.12);font-size:30px}.mic:hover{box-shadow:0 0 38px rgba(0,220,255,.5),inset 0 0 25px rgba(0,220,255,.18)}.mic.listening{animation:micPulse 1s infinite;background:rgba(0,220,255,.2)}@keyframes micPulse{50%{transform:scale(1.08);box-shadow:0 0 55px rgba(0,230,255,.65)}}
-.bottom{grid-column:2;grid-row:3;display:flex;align-items:center;gap:10px;padding:11px 18px;border-top:1px solid rgba(90,220,255,.16);background:rgba(2,8,18,.85);z-index:3}.prompt{flex:1;height:50px;border:1px solid rgba(80,215,255,.22);background:#06111d;border-radius:15px;color:#e8fbff;padding:0 16px;outline:none}.prompt:focus{border-color:#4beaff;box-shadow:0 0 20px rgba(0,210,255,.08)}.send{height:50px;padding:0 20px;border-radius:14px;border:1px solid #37d9ff;background:rgba(0,180,230,.12);color:#dffcff;font-weight:700}.send:hover{background:rgba(0,190,240,.22)}
-/* internal pages */
-.workspace{grid-template-columns:210px 1fr 250px;gap:14px}.workspaceWide{grid-template-columns:1fr}.canvas{position:relative;background:radial-gradient(circle at 50% 50%,rgba(0,190,255,.08),transparent 35%),#030b13;border-radius:18px;border:1px solid rgba(80,210,255,.18);overflow:hidden}.canvas:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(80,200,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(80,200,255,.055) 1px,transparent 1px);background-size:30px 30px}.node{position:absolute;min-width:120px;padding:13px;border:1px solid #35dfff;background:rgba(4,30,46,.9);border-radius:12px;text-align:center;box-shadow:0 0 22px rgba(0,210,255,.12);font-size:11px}.node small{display:block;color:#6d9baa;margin-top:5px}.wire{position:absolute;height:1px;background:#43ddff;box-shadow:0 0 7px #43ddff;transform-origin:left center}
-.code{height:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px}.editor{height:100%;padding:15px;background:#020911;border:1px solid rgba(70,210,255,.16);border-radius:16px;color:#9eeeff;font:12px/1.6 Consolas,monospace;white-space:pre;overflow:auto}.console{height:100%;padding:15px;border:1px solid rgba(70,210,255,.16);border-radius:16px;background:#030b13;color:#91d3e2;font:12px/1.6 Consolas,monospace}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;height:100%}.card{padding:16px;border:1px solid rgba(70,210,255,.17);background:rgba(8,24,38,.72);border-radius:15px}.card h3{font-size:13px;margin:0 0 8px;color:#e5fbff}.card p{font-size:10px;line-height:1.5;color:#7e9daa}.bigNumber{font-size:28px;color:#66eaff;font-weight:700;margin:10px 0}
-.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}.tool{padding:8px 10px;border:1px solid rgba(80,210,255,.2);background:#061421;color:#9bd8e7;border-radius:9px;font-size:10px}.tool:hover{border-color:#42ddff;color:#eaffff}
-.log{height:100%;padding:12px;overflow:hidden}.logline{padding:9px 0;border-bottom:1px solid rgba(80,210,255,.08);font-size:10px;color:#83a9b5}.logline b{color:#58e4ff;margin-right:8px}
-@media(max-width:1050px){.home{grid-template-columns:210px 1fr 220px}.cards{grid-template-columns:repeat(2,1fr)}} 
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+
+button,input,textarea{
+  font:inherit;
+}
+
+button{
+  color:var(--text);
+  background:#0d1823;
+  border:1px solid #294158;
+  border-radius:9px;
+  padding:8px 11px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#122638;
+  border-color:#4c718d;
+}
+
+.app{
+  width:100vw;
+  height:100vh;
+  display:grid;
+  grid-template-columns:250px minmax(0,1fr) 300px;
+  grid-template-rows:60px minmax(0,1fr) 92px;
+}
+
+/* TOP BAR */
+
+.top{
+  grid-column:1/4;
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:8px 15px;
+  background:#060a10ee;
+  border-bottom:1px solid var(--line);
+  z-index:20;
+}
+
+.logo{
+  font-size:17px;
+  font-weight:900;
+  letter-spacing:.13em;
+}
+
+.logo small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:8px;
+  letter-spacing:.18em;
+}
+
+.status{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.led{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 13px var(--green);
+}
+
+.grow{flex:1}
+
+.project{
+  color:var(--muted);
+  border:1px solid var(--line);
+  padding:7px 10px;
+  border-radius:8px;
+  font-size:10px;
+}
+
+/* SIDEBARS */
+
+.left,.right{
+  min-height:0;
+  overflow:auto;
+  background:var(--panel);
+}
+
+.left{
+  border-right:1px solid var(--line);
+}
+
+.right{
+  border-left:1px solid var(--line);
+}
+
+.pane{
+  padding:12px;
+  border-bottom:1px solid var(--line);
+}
+
+.pane h3{
+  margin:0 0 10px;
+  font-size:10px;
+  letter-spacing:.14em;
+  color:#a9bdd0;
+  text-transform:uppercase;
+}
+
+.search{
+  width:100%;
+  padding:10px;
+  color:var(--text);
+  background:#050a10;
+  border:1px solid #294056;
+  border-radius:9px;
+  outline:none;
+}
+
+.search:focus{
+  border-color:var(--cyan);
+}
+
+.dept{
+  margin-top:6px;
+  border:1px solid transparent;
+  border-radius:8px;
+  overflow:hidden;
+}
+
+.dept.open{
+  border-color:#234057;
+}
+
+.deptHead{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:9px;
+  background:#09131d;
+  border:0;
+  border-radius:0;
+  text-align:left;
+  font-size:10px;
+}
+
+.deptHead span{
+  color:var(--muted);
+  font-size:9px;
+}
+
+.parts{
+  display:none;
+  padding:4px;
+  background:#071018;
+}
+
+.dept.open .parts{
+  display:block;
+}
+
+.part{
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:7px;
+  border:0;
+  background:transparent;
+  text-align:left;
+  font-size:10px;
+}
+
+.part small{
+  color:#637b91;
+}
+
+/* CENTER */
+
+.center{
+  position:relative;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+
+  background:
+    radial-gradient(circle at 50% 45%,#163d511c,transparent 35%),
+    linear-gradient(#3d647c0d 1px,transparent 1px),
+    linear-gradient(90deg,#3d647c0d 1px,transparent 1px);
+
+  background-size:auto,30px 30px,30px 30px;
+}
+
+.hud{
+  position:absolute;
+  top:12px;
+  left:13px;
+  z-index:10;
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.chip{
+  padding:6px 8px;
+  background:#071018dc;
+  border:1px solid #20384d;
+  border-radius:7px;
+  color:#91a7bb;
+  font-size:9px;
+}
+
+.tools{
+  position:absolute;
+  top:12px;
+  right:13px;
+  z-index:10;
+  display:flex;
+  gap:5px;
+}
+
+.tools button{
+  font-size:10px;
+}
+
+.viewport{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+}
+
+.world{
+  position:absolute;
+  width:1800px;
+  height:1200px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(1);
+  transform-origin:center;
+}
+
+.gridCenter{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:8px;
+  height:8px;
+  border:1px solid #4e778d;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+}
+
+.nodes{
+  position:absolute;
+  inset:0;
+}
+
+.node{
+  position:absolute;
+  width:170px;
+  min-height:70px;
+  padding:11px;
+  border:1px solid #35536b;
+  border-radius:12px;
+  background:linear-gradient(145deg,#111e2b,#081018);
+  box-shadow:0 12px 32px #000a;
+  cursor:pointer;
+  user-select:none;
+}
+
+.node:hover{
+  border-color:#648aa5;
+}
+
+.node.selected{
+  border-color:var(--cyan);
+  box-shadow:
+    0 0 0 1px #55e5ff33,
+    0 0 30px #55e5ff18;
+}
+
+.node.fixed{
+  border-style:dashed;
+}
+
+.node .title{
+  font-size:12px;
+  font-weight:800;
+}
+
+.node .meta{
+  margin-top:3px;
+  color:var(--muted);
+  font-size:9px;
+}
+
+.node .state{
+  margin-top:8px;
+  color:#557087;
+  font-size:8px;
+}
+
+.wires{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.wire{
+  stroke:#50dcff;
+  stroke-width:2;
+  opacity:.72;
+}
+
+.wire.selected{
+  stroke:var(--green);
+  stroke-width:3;
+  opacity:.95;
+}
+
+/* RIGHT PANEL */
+
+.card{
+  padding:10px;
+  margin-bottom:9px;
+  background:#081019;
+  border:1px solid #1b3042;
+  border-radius:9px;
+  font-size:10px;
+}
+
+.simrow{
+  display:flex;
+  justify-content:space-between;
+  padding:7px 0;
+  border-bottom:1px solid #152635;
+}
+
+.simrow:last-child{
+  border-bottom:0;
+}
+
+.good{color:var(--green)}
+.warn{color:var(--yellow)}
+.bad{color:var(--red)}
+
+.inspectorRow{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin:6px 0;
+  color:#8da4b9;
+}
+
+.activity{
+  max-height:230px;
+  overflow:auto;
+}
+
+.log{
+  padding:6px 0;
+  border-bottom:1px solid #122536;
+  color:#9bb0c3;
+  font-size:9px;
+}
+
+.log b{
+  color:var(--cyan);
+}
+
+/* BOTTOM PROMPT BAR */
+
+.bottom{
+  grid-column:1/4;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 15px;
+  background:#070b11;
+  border-top:1px solid var(--line);
+  z-index:20;
+}
+
+.mic{
+  width:62px;
+  height:62px;
+  flex:0 0 62px;
+  border-radius:50%;
+  font-size:21px;
+  border:2px solid #2c748e;
+  background:radial-gradient(circle,#123b4d,#071018);
+  box-shadow:0 0 28px #55e5ff18;
+}
+
+.mic.on{
+  border-color:var(--green);
+  box-shadow:0 0 32px #58e6a355;
+  animation:pulse 1.1s infinite;
+}
+
+@keyframes pulse{
+  50%{transform:scale(1.06)}
+}
+
+.mode{
+  width:75px;
+  text-align:center;
+  color:var(--muted);
+  font-size:9px;
+}
+
+.mode b{
+  display:block;
+  margin-top:3px;
+  color:var(--cyan);
+}
+
+.composer{
+  flex:1;
+  min-width:0;
+  position:relative;
+}
+
+.prompt{
+  width:100%;
+  height:60px;
+  padding:11px 120px 10px 15px;
+  resize:none;
+  outline:none;
+  color:var(--text);
+  background:#0b141e;
+  border:1px solid #29445b;
+  border-radius:14px;
+}
+
+.prompt:focus{
+  border-color:#4c829d;
+  box-shadow:0 0 0 2px #55e5ff0c;
+}
+
+.send{
+  position:absolute;
+  top:8px;
+  right:7px;
+  height:44px;
+  background:#103a4c;
+  border-color:#318aaa;
+}
+
+/* CAMERA */
+
+.cam{
+  position:fixed;
+  right:315px;
+  bottom:105px;
+  width:230px;
+  display:none;
+  padding:8px;
+  background:#050a10;
+  border:1px solid #29435a;
+  border-radius:12px;
+  z-index:30;
+}
+
+.cam.on{
+  display:block;
+}
+
+.cam video{
+  width:100%;
+  border-radius:8px;
+  background:#000;
+  transform:scaleX(-1);
+}
+
+/* MODAL */
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:100;
+  align-items:center;
+  justify-content:center;
+  background:#000c;
+}
+
+.modal.open{
+  display:flex;
+}
+
+.dialog{
+  width:min(850px,92vw);
+  max-height:86vh;
+  overflow:auto;
+  padding:20px;
+  background:#09111a;
+  border:1px solid #2a465e;
+  border-radius:16px;
+}
+
+.dialog h2{
+  margin-top:0;
+}
+
+.dialog p{
+  color:#8ea4b9;
+  font-size:11px;
+  line-height:1.6;
+}
+
+.toast{
+  position:fixed;
+  right:18px;
+  bottom:108px;
+  display:none;
+  padding:11px;
+  background:#0c1722;
+  border:1px solid #35516a;
+  border-radius:10px;
+  font-size:11px;
+  z-index:120;
+}
+
+.toast.show{
+  display:block;
+}
+
+/* MOBILE */
+
+@media(max-width:1100px){
+  .app{
+    grid-template-columns:210px minmax(0,1fr);
+    grid-template-rows:60px minmax(0,1fr) 92px;
+  }
+
+  .top,
+  .bottom{
+    grid-column:1/3;
+  }
+
+  .right{
+    display:none;
+  }
+}
+
+@media(max-width:720px){
+  .app{
+    display:flex;
+    flex-direction:column;
+  }
+
+  .top{
+    flex:0 0 58px;
+  }
+
+  .left{
+    display:none;
+  }
+
+  .center{
+    flex:1;
+  }
+
+  .bottom{
+    flex:0 0 88px;
+  }
+
+  .top button{
+    display:none;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div class="app">
+
+<!-- TOP -->
+
 <header class="top">
-  <div class="brand"><div class="brandDot"></div>DAVID_AI</div>
-  <div class="status"><i class="led"></i><span id="status">SYSTEM ONLINE · READY</span><span class="clock" id="clock">00:00:00</span></div>
+
+  <div class="logo">
+    DAVID_AI
+    <small>ENGINEERING INNOVATION COMMAND CENTER</small>
+  </div>
+
+  <div class="status">
+    <span class="led" id="led"></span>
+    <span id="status">READY</span>
+  </div>
+
+  <div class="grow"></div>
+
+  <div class="project" id="projectName">
+    UNTITLED PROJECT
+  </div>
+
+  <button onclick="newProject()">New</button>
+  <button onclick="saveProject()">Save</button>
+  <button onclick="loadProject()">Load</button>
+  <button onclick="openGuide()">Guide</button>
+
 </header>
 
-<aside class="side">
-  <button class="nav active" data-screen="home"><span>◉</span><small>HOME</small></button>
-  <button class="nav" data-screen="file"><span>▣</span><small>FILE</small></button>
-  <button class="nav" data-screen="design"><span>⌬</span><small>DESIGN</small></button>
-  <button class="nav" data-screen="visual"><span>◇</span><small>VISUAL</small></button>
-  <button class="nav" data-screen="code"><span>&lt;/&gt;</span><small>CODE</small></button>
-  <button class="nav" data-screen="cad"><span>△</span><small>CAD</small></button>
-  <button class="nav" data-screen="simulation"><span>∿</span><small>SIM</small></button>
-  <button class="nav" data-screen="library"><span>⊞</span><small>LIBRARY</small></button>
-  <button class="nav" data-screen="gesture"><span>✋</span><small>GESTURE</small></button>
+
+<!-- LEFT -->
+
+<aside class="left">
+
+  <div class="pane">
+
+    <h3>Universal Library</h3>
+
+    <input
+      class="search"
+      id="libSearch"
+      placeholder="Search every department..."
+      oninput="renderDepartments()"
+    >
+
+    <div id="departments"></div>
+
+  </div>
+
+
+  <div class="pane">
+
+    <h3>Simulation Library</h3>
+
+    <div id="simLibrary"></div>
+
+  </div>
+
+
+  <div class="pane">
+
+    <h3>Project Pages</h3>
+
+    <button class="part" onclick="addPage()">
+      ＋ New editable page
+    </button>
+
+    <div id="pages"></div>
+
+  </div>
+
 </aside>
 
-<main class="main">
 
-<section id="home" class="screen active home">
-  <div class="panel">
-    <div class="panelHead">Project <span>LIVE</span></div>
-    <div class="panelBody">
-      <div class="item"><b>Current Project</b>Innovation Prototype<span>Page 01 · editable</span></div>
-      <div class="item"><b>Active Engine</b>Visual Engineering<span>Design → Check → Run</span></div>
-      <div class="item"><b>Model State</b><span id="modelState">No physical hardware verified</span></div>
-      <div style="margin-top:13px">
-        <span class="chip">EEE</span><span class="chip">ECE</span><span class="chip">CSE</span><span class="chip">CIVIL</span><span class="chip">MECH</span><span class="chip">AERO</span><span class="chip">SPACE</span><span class="chip">SCIENCE</span>
+<!-- CENTER VISUAL ENGINE -->
+
+<main class="center" id="center">
+
+  <div class="hud">
+
+    <span class="chip">VISUAL ENGINE</span>
+
+    <span class="chip" id="selChip">
+      NO SELECTION
+    </span>
+
+    <span class="chip" id="linkChip">
+      0 LINKS
+    </span>
+
+    <span class="chip" id="simChip">
+      IDLE
+    </span>
+
+  </div>
+
+
+  <div class="tools">
+
+    <button onclick="undo()">↶</button>
+
+    <button onclick="redo()">↷</button>
+
+    <button onclick="fitView()">FIT</button>
+
+    <button onclick="changeZoom(1.15)">＋</button>
+
+    <button onclick="changeZoom(.87)">−</button>
+
+    <button onclick="startConnectMode()">
+      CONNECT
+    </button>
+
+  </div>
+
+
+  <div class="viewport">
+
+    <div class="world" id="world">
+
+      <svg
+        class="wires"
+        id="wires"
+        xmlns="http://www.w3.org/2000/svg">
+      </svg>
+
+      <div
+        class="nodes"
+        id="nodes">
       </div>
+
+      <div class="gridCenter"></div>
+
     </div>
+
   </div>
-
-  <div class="panel center">
-    <div class="wake">VOICE CORE · <strong>SAY “HEY DAVID”</strong></div>
-    <div class="core">
-      <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
-      <div class="ray a"></div><div class="ray b"></div><div class="ray c"></div><div class="ray d"></div>
-      <div class="orb"></div>
-      <div class="coreLabel">INNOVATION COMMAND CORE</div>
-    </div>
-    <button class="mic" id="mic" title="Activate microphone">◉</button>
-  </div>
-
-  <div class="panel">
-    <div class="panelHead">Activity <span id="activityCount">00</span></div>
-    <div class="panelBody log" id="homeLog">
-      <div class="logline"><b>READY</b>System initialized</div>
-      <div class="logline"><b>VOICE</b>Microphone waiting</div>
-      <div class="logline"><b>ENGINE</b>Design workspace available</div>
-      <div class="logline"><b>AI</b>Awaiting instruction</div>
-    </div>
-  </div>
-</section>
-
-<section id="file" class="screen workspace">
-  <div class="panel"><div class="panelHead">File Control</div><div class="panelBody">
-    <button class="tool" style="width:100%;margin-bottom:8px" onclick="newProject()">＋ BLANK MODEL</button>
-    <button class="tool" style="width:100%;margin-bottom:8px" onclick="saveProject()">⇩ SAVE MODEL</button>
-    <button class="tool" style="width:100%;margin-bottom:8px" onclick="loadProject()">⇧ LOAD MODEL</button>
-    <button class="tool" style="width:100%" onclick="exportProject()">⬡ EXPORT JSON</button>
-  </div></div>
-  <div class="panel"><div class="panelHead">Project Workspace</div><div class="panelBody">
-    <div class="cards">
-      <div class="card"><h3>Project</h3><div class="bigNumber" id="projectName">01</div><p>Innovation Prototype</p></div>
-      <div class="card"><h3>Pages</h3><div class="bigNumber">01</div><p>Multiple editable pages can be added.</p></div>
-      <div class="card"><h3>Components</h3><div class="bigNumber" id="componentCount">00</div><p>Imported engineering elements.</p></div>
-      <div class="card"><h3>Connections</h3><div class="bigNumber" id="connectionCount">00</div><p>Logical model connections.</p></div>
-    </div>
-  </div></div>
-  <div class="panel"><div class="panelHead">File Information</div><div class="panelBody">
-    <div class="item"><b>Storage</b>Browser project state</div>
-    <div class="item"><b>Safety</b>API keys are never stored in this page.</div>
-    <div class="item"><b>Revision</b>DAVID_AI prototype workspace</div>
-  </div></div>
-</section>
-
-<section id="design" class="screen workspace">
-  <div class="panel"><div class="panelHead">Design Tools</div><div class="panelBody">
-    <div class="toolbar">
-      <button class="tool" onclick="addNode('NAND Gate')">NAND</button><button class="tool" onclick="addNode('Resistor')">R</button><button class="tool" onclick="addNode('Capacitor')">C</button><button class="tool" onclick="addNode('Sensor')">SENSOR</button><button class="tool" onclick="addNode('Motor')">MOTOR</button><button class="tool" onclick="addNode('Controller')">CPU</button>
-    </div>
-    <div class="item"><b>AI Design</b>Describe what you want in the bottom command bar.</div>
-    <div class="item"><b>Connection</b>Use visual engine to connect components.</div>
-  </div></div>
-  <div class="canvas" id="designCanvas"></div>
-  <div class="panel"><div class="panelHead">Design Inspector</div><div class="panelBody">
-    <div class="item"><b>Selected</b><span id="selected">None</span></div>
-    <div class="item"><b>Properties</b>Position · rotation · type · state</div>
-    <button class="tool" onclick="splitModel()">SPLIT</button>
-    <button class="tool" onclick="rotateModel()">ROTATE</button>
-    <button class="tool" onclick="checkModel()">CHECK</button>
-  </div></div>
-</section>
-
-<section id="visual" class="screen workspace">
-  <div class="panel"><div class="panelHead">Visual Engine</div><div class="panelBody">
-    <div class="item"><b>SELECT</b>Choose a component</div>
-    <div class="item"><b>SPLIT</b>Separate model elements</div>
-    <div class="item"><b>ROTATE</b>Rotate selected element</div>
-    <div class="item"><b>CONNECT</b>Join ports using visual lines</div>
-    <div class="item"><b>RUN</b>Transfer to simulation</div>
-  </div></div>
-  <div class="canvas" id="visualCanvas">
-    <div class="node" style="left:22%;top:32%">INPUT<small>PORT A</small></div>
-    <div class="node" style="left:55%;top:48%">PROCESS<small>CORE</small></div>
-    <div class="node" style="left:35%;top:68%">OUTPUT<small>PORT B</small></div>
-    <div class="wire" style="left:34%;top:39%;width:22%;transform:rotate(19deg)"></div>
-    <div class="wire" style="left:59%;top:58%;width:17%;transform:rotate(137deg)"></div>
-  </div>
-  <div class="panel"><div class="panelHead">Visual State</div><div class="panelBody">
-    <div class="item"><b>MODE</b>Interactive prototype</div>
-    <div class="item"><b>OBJECTS</b>3 visual objects</div>
-    <div class="item"><b>WIRES</b>2 logical paths</div>
-    <button class="tool" onclick="runSimulation()">▶ RUN MODEL</button>
-  </div></div>
-</section>
-
-<section id="code" class="screen code">
-  <div class="editor" id="editor"># DAVID_AI generated prototype
-# Python / C / Java compatible design workspace
-
-def build_model():
-    model = {
-        "name": "Innovation Prototype",
-        "components": [
-            {"type": "NAND_Gate", "id": "U1"},
-            {"type": "Resistor", "id": "R1"},
-            {"type": "Capacitor", "id": "C1"}
-        ],
-        "connections": [
-            ["U1.OUT", "R1.IN"],
-            ["R1.OUT", "C1.IN"]
-        ]
-    }
-    return model
-
-model = build_model()
-print("MODEL READY")</div>
-  <div class="console" id="console">DAVID_AI CODE ENGINE
-────────────────────────────
-STATUS: READY
-
-> Model graph loaded.
-> Python generation available.
-> Simulation bridge waiting.
-
-Use the command bar to request:
-“create Python code for this model”
-or
-“run the model”</div>
-</section>
-
-<section id="cad" class="screen workspaceWide">
-  <div class="panel"><div class="panelHead">CAD / Mechanical Design</div><div class="panelBody">
-    <div class="cards">
-      <div class="card"><h3>Sketch</h3><div class="bigNumber">◇</div><p>2D geometry and construction guides.</p></div>
-      <div class="card"><h3>Assembly</h3><div class="bigNumber">◎</div><p>Separate parts, joints and rotations.</p></div>
-      <div class="card"><h3>Machine</h3><div class="bigNumber">⚙</div><p>Automobile, aircraft and mechanical parts.</p></div>
-      <div class="card"><h3>Pipeline</h3><div class="bigNumber">⇢</div><p>Civil and fluid-system components.</p></div>
-    </div>
-  </div></div>
-</section>
-
-<section id="simulation" class="screen workspaceWide">
-  <div class="panel"><div class="panelHead">Simulation Control</div><div class="panelBody">
-    <div class="toolbar"><button class="tool" onclick="checkModel()">CHECK MODEL</button><button class="tool" onclick="runSimulation()">▶ START</button><button class="tool" onclick="stopSimulation()">■ STOP</button><button class="tool" onclick="resetSimulation()">↻ RESET</button></div>
-    <div class="cards">
-      <div class="card"><h3>Design Validation</h3><div class="bigNumber" id="simCheck">READY</div><p>Logical model inspection.</p></div>
-      <div class="card"><h3>Execution</h3><div class="bigNumber" id="simRun">IDLE</div><p>Prototype simulation state.</p></div>
-      <div class="card"><h3>Signals</h3><div class="bigNumber">07</div><p>Reserved signal channels.</p></div>
-      <div class="card"><h3>Safety</h3><div class="bigNumber">UI</div><p>Simulation does not prove physical hardware safety.</p></div>
-    </div>
-  </div></div>
-</section>
-
-<section id="library" class="screen workspace">
-  <div class="panel"><div class="panelHead">Departments</div><div class="panelBody">
-    <button class="tool" onclick="library('EEE')">EEE</button><button class="tool" onclick="library('ECE')">ECE</button><button class="tool" onclick="library('CSE')">CSE</button><button class="tool" onclick="library('CIVIL')">CIVIL</button><button class="tool" onclick="library('MECH')">MECH</button><button class="tool" onclick="library('AERO')">AERO</button><button class="tool" onclick="library('SPACE')">SPACE</button><button class="tool" onclick="library('BIO')">BIO</button><button class="tool" onclick="library('CHEM')">CHEM</button><button class="tool" onclick="library('QUANTUM')">QUANTUM</button>
-  </div></div>
-  <div class="panel"><div class="panelHead">Universal Component Library</div><div class="panelBody" id="libraryContent">
-    <div class="cards">
-      <div class="card"><h3>Electronics</h3><p>Resistors, capacitors, diodes, transistors, ICs, sensors, controllers, power modules.</p></div>
-      <div class="card"><h3>Computing</h3><p>Processors, memory, buses, networking, algorithms, software modules.</p></div>
-      <div class="card"><h3>Mechanical</h3><p>Motors, gears, shafts, bearings, engines, mechanisms and assemblies.</p></div>
-      <div class="card"><h3>Civil</h3><p>Pipelines, structures, foundations, materials, fluid systems and tools.</p></div>
-    </div>
-  </div></div>
-  <div class="panel"><div class="panelHead">Import</div><div class="panelBody"><div class="item"><b>Import Component</b>Add an item to the active design.</div><button class="tool" onclick="addNode('Imported Component')">＋ IMPORT</button></div></div>
-</section>
-
-<section id="gesture" class="screen workspaceWide">
-  <div class="panel"><div class="panelHead">Gesture Control Guide</div><div class="panelBody">
-    <div class="cards">
-      <div class="card"><h3>☝ One Finger</h3><p>Select / remove one active element depending on current gesture mode.</p></div>
-      <div class="card"><h3>✌ Two Fingers</h3><p>Move to the next element or navigate selection order.</p></div>
-      <div class="card"><h3>✋ Five Fingers</h3><p>Open-hand command state for global interaction.</p></div>
-      <div class="card"><h3>← Swipe</h3><p>Undo / navigation gesture.</p></div>
-      <div class="card"><h3>→ Swipe</h3><p>Redo / forward navigation gesture.</p></div>
-      <div class="card"><h3>↻ Rotate</h3><p>Rotate the selected visual component.</p></div>
-      <div class="card"><h3>⇱ Split</h3><p>Separate prototype elements for inspection.</p></div>
-      <div class="card"><h3>◎ Assemble</h3><p>Recombine separated elements.</p></div>
-    </div>
-  </div></div>
-</section>
 
 </main>
 
+
+<!-- RIGHT -->
+
+<aside class="right">
+
+  <div class="pane">
+
+    <h3>Selected Component</h3>
+
+    <div class="card" id="inspector">
+      Nothing selected.
+    </div>
+
+  </div>
+
+
+  <div class="pane">
+
+    <h3>Simulation</h3>
+
+    <div class="card">
+
+      <div class="simrow">
+        <span>Mode</span>
+        <b id="simMode">CONCEPTUAL</b>
+      </div>
+
+      <div class="simrow">
+        <span>Check</span>
+        <b id="checkState" class="good">
+          READY
+        </b>
+      </div>
+
+      <div class="simrow">
+        <span>Run</span>
+        <b id="runState">
+          IDLE
+        </b>
+      </div>
+
+      <div class="simrow">
+        <span>Connections</span>
+        <b id="rightLinks">
+          0
+        </b>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <button
+        style="width:100%"
+        onclick="testModel()">
+        Test current model
+      </button>
+
+      <div style="height:6px"></div>
+
+      <button
+        style="width:100%"
+        onclick="runSimulation()">
+        Run simulation
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="pane">
+
+    <h3>Activity</h3>
+
+    <div
+      class="activity"
+      id="activity">
+    </div>
+
+  </div>
+
+
+  <div class="pane">
+
+    <h3>Gesture Control</h3>
+
+    <div class="card">
+
+      Point = select<br>
+      Pinch = move<br>
+      Open palm = show all<br>
+      Fist = split<br>
+      Victory = rotate<br>
+      Thumb up = test<br>
+      Thumb down = run<br>
+      Two-hand distance = zoom<br>
+      Two-hand angle = rotate
+
+    </div>
+
+    <button
+      style="width:100%"
+      onclick="toggleCamera()"
+      id="cameraBtn">
+      Enable hands
+    </button>
+
+  </div>
+
+</aside>
+
+
+<!-- COMMAND BAR -->
+
 <footer class="bottom">
-  <input id="prompt" class="prompt" placeholder='Speak or type: “Hey David, create a NAND circuit with a resistor and capacitor”'>
-  <button class="send" onclick="handleCommand()">SEND ↗</button>
+
+  <button
+    class="mic"
+    id="mic"
+    onclick="toggleVoice()">
+    ◉
+  </button>
+
+  <div class="mode">
+    VOICE
+    <b id="voiceMode">OFF</b>
+  </div>
+
+  <div class="composer">
+
+    <textarea
+      class="prompt"
+      id="prompt"
+      placeholder="Describe the whole operation: Create a motor system, import the components, connect them and test..."
+    ></textarea>
+
+    <button
+      class="send"
+      onclick="submitPrompt()">
+      EXECUTE
+    </button>
+
+  </div>
+
 </footer>
+
 </div>
 
+
+<!-- CAMERA -->
+
+<div class="cam" id="camPanel">
+
+  <video
+    id="video"
+    autoplay
+    muted
+    playsinline>
+  </video>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div
+  class="modal"
+  id="modal">
+
+  <div
+    class="dialog"
+    id="dialog">
+  </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div
+  class="toast"
+  id="toast">
+</div>
+
+
 <script>
-const state={nodes:[],connections:[],activity:0,listening:false};
-const navs=document.querySelectorAll('.nav');
-navs.forEach(n=>n.addEventListener('click',()=>showScreen(n.dataset.screen)));
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  navs.forEach(n=>n.classList.toggle('active',n.dataset.screen===id));
-  log('NAV','Opened '+id.toUpperCase());
+
+/* =========================================================
+   DAVID_AI FRONTEND
+   ========================================================= */
+
+const $ = id => document.getElementById(id);
+
+let state = {
+  name:"UNTITLED PROJECT",
+
+  pages:[
+    {
+      name:"Main Design",
+      nodes:[],
+      links:[]
+    }
+  ],
+
+  pageIndex:0,
+
+  selected:null,
+
+  zoom:1,
+
+  connectMode:false,
+  connectFirst:null,
+
+  voice:false,
+
+  history:[],
+  future:[],
+
+  tests:0
+};
+
+
+/* =========================================================
+   UNIVERSAL COMPONENT LIBRARY
+   ========================================================= */
+
+const LIB = {
+
+"CSE":[
+"CPU",
+"GPU",
+"RAM",
+"ROM",
+"Microcontroller",
+"Microprocessor",
+"FPGA",
+"PLC",
+"Network Switch",
+"Router",
+"Wi-Fi Module",
+"Bluetooth Module",
+"Sensor Node",
+"Database Node",
+"AI Accelerator",
+"Camera Module",
+"SSD",
+"HDD",
+"Display",
+"Keyboard",
+"Mouse",
+"Servo Controller",
+"Motor Controller",
+"Embedded Controller",
+"Ethernet Module",
+"USB Module",
+"Raspberry Pi",
+"Development Board",
+"Logic Controller",
+"Power Supply Module"
+],
+
+"EEE":[
+"Battery",
+"DC Motor",
+"AC Motor",
+"Generator",
+"Transformer",
+"Relay",
+"Contactor",
+"Switch",
+"Fuse",
+"Resistor",
+"Potentiometer",
+"Capacitor",
+"Inductor",
+"Diode",
+"Zener Diode",
+"LED",
+"Bridge Rectifier",
+"Voltage Regulator",
+"Current Sensor",
+"Voltage Sensor",
+"Power Supply",
+"Inverter",
+"Rectifier",
+"Motor Driver",
+"Solenoid",
+"Electromagnetic Coil",
+"Ground",
+"Bus Bar"
+],
+
+"ECE":[
+"AND Gate",
+"OR Gate",
+"NOT Gate",
+"NAND Gate",
+"NOR Gate",
+"XOR Gate",
+"XNOR Gate",
+"Flip Flop",
+"Counter",
+"ADC",
+"DAC",
+"Op Amp",
+"Comparator",
+"555 Timer",
+"UART",
+"SPI",
+"I2C",
+"CAN Bus",
+"Ethernet",
+"RF Module",
+"GPS Module",
+"Bluetooth Module",
+"Wi-Fi Module",
+"Antenna",
+"Oscillator",
+"Crystal",
+"PLL",
+"PCB",
+"Signal Generator",
+"Oscilloscope"
+],
+
+"FT":[
+"Food Mixer",
+"Conveyor",
+"Heating Chamber",
+"Cooling Chamber",
+"Temperature Sensor",
+"Pressure Sensor",
+"Flow Sensor",
+"Level Sensor",
+"Pump",
+"Valve",
+"Filter",
+"Reactor",
+"Storage Tank",
+"Feeder",
+"Dryer",
+"Blender",
+"Separator",
+"Packaging Unit",
+"Heat Exchanger",
+"Process Controller"
+],
+
+"CIVIL":[
+"Beam",
+"Column",
+"Slab",
+"Foundation",
+"Footing",
+"Wall",
+"Road",
+"Bridge",
+"Tunnel",
+"Pipeline",
+"Water Tank",
+"Drainage Pipe",
+"Manhole",
+"Valve Chamber",
+"Retaining Wall",
+"Dam",
+"Canal",
+"Tower",
+"Building",
+"Staircase",
+"Elevator Shaft",
+"Steel Reinforcement",
+"Concrete Block",
+"Survey Point"
+],
+
+"MECH":[
+"Engine",
+"Gear",
+"Gearbox",
+"Shaft",
+"Bearing",
+"Coupling",
+"Pulley",
+"Belt",
+"Chain",
+"Sprocket",
+"Flywheel",
+"Piston",
+"Cylinder",
+"Crankshaft",
+"Cam",
+"Spring",
+"Damper",
+"Pump",
+"Compressor",
+"Fan",
+"Impeller",
+"Heat Exchanger",
+"Mechanical Joint",
+"Frame",
+"Chassis"
+],
+
+"AUTOMOBILE":[
+"Engine",
+"Transmission",
+"Clutch",
+"Differential",
+"Drive Shaft",
+"Axle",
+"Wheel",
+"Tire",
+"Brake",
+"Brake Disc",
+"Brake Caliper",
+"Steering",
+"Suspension",
+"Shock Absorber",
+"Radiator",
+"Fuel Tank",
+"Fuel Pump",
+"Alternator",
+"Starter Motor",
+"ECU",
+"ABS Controller",
+"Airbag",
+"Battery",
+"Electric Motor",
+"EV Controller",
+"Charging Port"
+],
+
+"AEROSPACE":[
+"Aircraft Engine",
+"Jet Turbine",
+"Propeller",
+"Wing",
+"Fuselage",
+"Tail",
+"Rudder",
+"Elevator",
+"Aileron",
+"Landing Gear",
+"Brake System",
+"Fuel Tank",
+"Fuel Pump",
+"Avionics",
+"Flight Controller",
+"GPS",
+"Radar",
+"Communication Module",
+"Navigation System",
+"Pitot Tube",
+"Cabin",
+"Actuator",
+"Hydraulic System",
+"Control Surface"
+],
+
+"SPACECRAFT":[
+"Rocket Engine",
+"Fuel Tank",
+"Oxidizer Tank",
+"Rocket Body",
+"Payload",
+"Satellite",
+"Solar Panel",
+"Battery",
+"Reaction Wheel",
+"Gyroscope",
+"Star Tracker",
+"GPS Receiver",
+"Telemetry Module",
+"Communication Antenna",
+"Flight Computer",
+"Thruster",
+"Docking Port",
+"Heat Shield",
+"Parachute",
+"Landing Module",
+"Orbital Sensor",
+"Navigation Unit"
+],
+
+"FLUID":[
+"Pump",
+"Pipe",
+"Valve",
+"Tank",
+"Reservoir",
+"Flow Meter",
+"Pressure Gauge",
+"Pressure Sensor",
+"Flow Sensor",
+"Filter",
+"Compressor",
+"Hydraulic Cylinder",
+"Hydraulic Motor",
+"Manifold",
+"Nozzle",
+"Vent",
+"Heat Exchanger",
+"Fluid Controller"
+],
+
+"SCIENCE":[
+"Particle",
+"Mass",
+"Force",
+"Velocity",
+"Acceleration",
+"Spring",
+"Pendulum",
+"Magnet",
+"Electric Field",
+"Magnetic Field",
+"Light Source",
+"Lens",
+"Mirror",
+"Prism",
+"Wave Generator",
+"Detector",
+"Sensor",
+"Thermometer",
+"Pressure Chamber",
+"Vacuum Chamber"
+],
+
+"CHEMISTRY":[
+"Atom",
+"Molecule",
+"Reaction Vessel",
+"Beaker",
+"Flask",
+"Test Tube",
+"Distillation Column",
+"Separator",
+"Reactor",
+"Filter",
+"Pump",
+"Valve",
+"Chemical Tank",
+"Heat Source",
+"Cooler",
+"pH Sensor",
+"Temperature Sensor",
+"Pressure Sensor",
+"Flow Sensor",
+"Catalyst"
+],
+
+"BIOLOGY":[
+"Cell",
+"Nucleus",
+"DNA",
+"RNA",
+"Protein",
+"Enzyme",
+"Membrane",
+"Microscope",
+"Incubator",
+"Culture Chamber",
+"Bio Reactor",
+"Sensor",
+"Sample Holder",
+"Fluid Chamber",
+"Pump",
+"Filter",
+"Temperature Controller",
+"Imaging Module"
+],
+
+"NANOTECH":[
+"Nano Sensor",
+"Nano Wire",
+"Nano Tube",
+"Graphene Sheet",
+"Quantum Dot",
+"Nano Particle",
+"Nano Motor",
+"Nano Robot",
+"Nano Material",
+"Nano Electrode",
+"Nano Membrane",
+"Nano Transistor",
+"Nano Battery",
+"Nano Catalyst"
+],
+
+"QUANTUM":[
+"Qubit",
+"Quantum Gate",
+"Quantum Register",
+"Quantum Sensor",
+"Quantum Processor",
+"Quantum Memory",
+"Photon Source",
+"Photon Detector",
+"Superconducting Circuit",
+"Quantum Interconnect",
+"Quantum Controller",
+"Quantum Measurement"
+],
+
+"ROBOTICS":[
+"Robot Base",
+"Robot Arm",
+"Servo Motor",
+"Stepper Motor",
+"Motor Driver",
+"Encoder",
+"IMU",
+"Camera",
+"LiDAR",
+"Ultrasonic Sensor",
+"Force Sensor",
+"Gripper",
+"Manipulator",
+"Controller",
+"Battery",
+"Wireless Module",
+"Navigation Module",
+"Obstacle Sensor"
+],
+
+"RENEWABLE":[
+"Solar Panel",
+"Wind Turbine",
+"Generator",
+"Battery",
+"Inverter",
+"Charge Controller",
+"Hydro Turbine",
+"Hydro Generator",
+"Biogas Reactor",
+"Fuel Cell",
+"Energy Storage",
+"Power Controller",
+"Smart Meter"
+]
+
+};
+
+
+/* =========================================================
+   SIMULATION LIBRARY
+   ========================================================= */
+
+const SIM_LIBRARY = [
+  "Electrical Simulation",
+  "Mechanical Simulation",
+  "Fluid Simulation",
+  "Civil Simulation",
+  "Automobile Simulation",
+  "Aerospace Simulation",
+  "Spacecraft Simulation",
+  "Thermal Simulation",
+  "Control System Simulation",
+  "Robotics Simulation",
+  "General System Simulation"
+];
+
+
+/* =========================================================
+   PAGE HELPERS
+   ========================================================= */
+
+function page(){
+  return state.pages[state.pageIndex];
 }
-function log(type,msg){
-  state.activity++;
-  document.getElementById('activityCount').textContent=String(state.activity).padStart(2,'0');
-  const box=document.getElementById('homeLog');
-  const el=document.createElement('div');el.className='logline';el.innerHTML='<b>'+type+'</b>'+msg;
-  box.prepend(el);while(box.children.length>7)box.lastChild.remove();
+
+function nextId(){
+  return "N_"+Date.now()+"_"+Math.floor(Math.random()*100000);
 }
-function addNode(name){
-  const id='N'+(state.nodes.length+1);
-  state.nodes.push({id,name});
-  renderDesign();
-  document.getElementById('componentCount').textContent=String(state.nodes.length).padStart(2,'0');
-  log('DESIGN',name+' imported into model');
-  showScreen('design');
+
+function selectedNode(){
+  return page().nodes.find(
+    n => n.id===state.selected
+  );
 }
-function renderDesign(){
-  const c=document.getElementById('designCanvas');c.innerHTML='';
-  state.nodes.forEach((n,i)=>{
-    const el=document.createElement('div');el.className='node';el.style.left=(8+(i%3)*30)+'%';el.style.top=(18+Math.floor(i/3)*30)+'%';el.textContent=n.name;
-    const sm=document.createElement('small');sm.textContent=n.id+' · editable';el.appendChild(sm);
-    el.onclick=()=>{document.getElementById('selected').textContent=n.name+' ('+n.id+')';log('SELECT',n.name+' selected')};
-    c.appendChild(el);
+
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+function snapshot(){
+  return JSON.stringify({
+    name:state.name,
+    pages:state.pages,
+    pageIndex:state.pageIndex,
+    selected:state.selected,
+    zoom:state.zoom
   });
 }
-function splitModel(){log('VISUAL','Selected prototype elements separated');}
-function rotateModel(){log('VISUAL','Selected component rotated 90°');}
-function checkModel(){document.getElementById('simCheck').textContent='PASS';document.getElementById('modelState').textContent='Logical structure checked';log('CHECK','Logical model check completed — physical hardware not verified');showScreen('simulation')}
-function runSimulation(){document.getElementById('simRun').textContent='RUNNING';log('SIM','Design transferred to simulation');setTimeout(()=>{document.getElementById('simRun').textContent='COMPLETE';log('SIM','Simulation cycle completed')},1200);showScreen('simulation')}
-function stopSimulation(){document.getElementById('simRun').textContent='STOPPED';log('SIM','Simulation stopped')}
-function resetSimulation(){document.getElementById('simRun').textContent='IDLE';document.getElementById('simCheck').textContent='READY';log('SIM','Simulation reset')}
-function newProject(){state.nodes=[];renderDesign();document.getElementById('componentCount').textContent='00';log('FILE','Blank model created')}
-function saveProject(){localStorage.setItem('DAVID_AI_MODEL',JSON.stringify(state));log('FILE','Model saved in browser storage')}
-function loadProject(){const x=localStorage.getItem('DAVID_AI_MODEL');if(x){Object.assign(state,JSON.parse(x));renderDesign();document.getElementById('componentCount').textContent=String(state.nodes.length).padStart(2,'0');log('FILE','Previous model loaded')}else log('FILE','No saved model found')}
-function exportProject(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DAVID_AI_model.json';a.click();URL.revokeObjectURL(a.href);log('FILE','Model exported')}
-function library(dept){document.getElementById('libraryContent').innerHTML='<div class="cards"><div class="card"><h3>'+dept+' Library</h3><div class="bigNumber">＋</div><p>Component collection ready for import.</p></div><div class="card"><h3>Import</h3><p>Use voice or the command bar to request a component.</p></div><div class="card"><h3>Visual</h3><p>Imported components can be positioned and connected.</p></div><div class="card"><h3>Simulation</h3><p>Validated logical models can be transferred to simulation.</p></div></div>';log('LIB','Opened '+dept+' component library')}
-function handleCommand(){
-  const p=document.getElementById('prompt');const text=p.value.trim();if(!text)return;
-  log('USER',text);p.value='';
-  const t=text.toLowerCase();
-  if(t.includes('simulation')||t.includes('ready to run')||t.includes('run model')){runSimulation();return}
-  if(t.includes('split')){splitModel();return}
-  if(t.includes('rotate')){rotateModel();return}
-  if(t.includes('check')||t.includes('validate')){checkModel();return}
-  if(t.includes('code')||t.includes('python')){showScreen('code');log('AI','Code workspace opened');return}
-  if(t.includes('library')||t.includes('component')){showScreen('library');log('AI','Universal component library opened');return}
-  if(t.includes('design')||t.includes('circuit')||t.includes('prototype')||t.includes('create')){
-    if(t.includes('nand'))addNode('NAND Gate');
-    if(t.includes('resistor'))addNode('Resistor');
-    if(t.includes('capacitor'))addNode('Capacitor');
-    showScreen('design');log('AI','Design instruction interpreted');
+
+function restore(data){
+  const x=JSON.parse(data);
+
+  state.name=x.name;
+  state.pages=x.pages;
+  state.pageIndex=x.pageIndex;
+  state.selected=x.selected;
+  state.zoom=x.zoom;
+
+  renderAll();
+}
+
+function checkpoint(){
+  state.history.push(snapshot());
+
+  if(state.history.length>80){
+    state.history.shift();
+  }
+
+  state.future=[];
+}
+
+function undo(){
+
+  if(!state.history.length){
+    toast("Nothing to undo");
     return;
   }
-  log('AI','Instruction received — connect the real AI backend for natural-language generation.');
-}
-const mic=document.getElementById('mic');
-let recognition=null;
-mic.onclick=()=>{
-  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){alert('Speech recognition is not supported in this browser. Use Chrome or Edge.');return}
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(state.listening){recognition&&recognition.stop();return}
-  recognition=new SR();recognition.lang='en-US';recognition.continuous=false;recognition.interimResults=false;
-  recognition.onstart=()=>{state.listening=true;mic.classList.add('listening');document.getElementById('status').textContent='LISTENING · SAY “HEY DAVID”';};
-  recognition.onresult=e=>{const text=e.results[0][0].transcript;document.getElementById('prompt').value=text;log('VOICE',text);handleCommand()};
-  recognition.onerror=e=>log('VOICE','Recognition: '+e.error);
-  recognition.onend=()=>{state.listening=false;mic.classList.remove('listening');document.getElementById('status').textContent='SYSTEM ONLINE · READY'};
-  recognition.start();
-};
-document.getElementById('prompt').addEventListener('keydown',e=>{if(e.key==='Enter')handleCommand()});
-function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB')}
-setInterval(updateClock,1000);updateClock();
-log('SYSTEM','Command center initialized');
-</script>
-</body>
-</html>'''
 
-path = Path("/mnt/data/DAVID_AI_Futuristic_FullScreen.html")
-path.write_text(html, encoding="utf-8")
-print(path)
+  state.future.push(snapshot());
+
+  const old=state.history.pop();
+
+  restore(old);
+
+  log("Undo completed","UNDO");
+}
+
+function redo(){
+
+  if(!state.future.length){
+    toast("Nothing to redo");
+    return;
+  }
+
+  state.history.push(snapshot());
+
+  const next=state.future.pop();
+
+  restore(next);
+
+  log("Redo completed","REDO");
+}
+
+
+/* =========================================================
+   PROJECT
+   ========================================================= */
+
+function newProject(){
+
+  if(!confirm("Create a new project?")) return;
+
+  checkpoint();
+
+  state.name="UNTITLED PROJECT";
+
+  state.pages=[
+    {
+      name:"Main Design",
+      nodes:[],
+      links:[]
+    }
+  ];
+
+  state.pageIndex=0;
+  state.selected=null;
+
+  renderAll();
+
+  log("New project created","FILE");
+}
+
+function saveProject(){
+
+  localStorage.setItem(
+    "DAVID_AI_PROJECT",
+    JSON.stringify({
+      name:state.name,
+      pages:state.pages,
+      pageIndex:state.pageIndex
+    })
+  );
+
+  log("Project saved in browser storage","FILE");
+
+  toast("Project saved");
+}
+
+function loadProject(){
+
+  const raw=localStorage.getItem(
+    "DAVID_AI_PROJECT"
+  );
+
+  if(!raw){
+    toast("No saved project");
+    return;
+  }
+
+  checkpoint();
+
+  const x=JSON.parse(raw);
+
+  state.name=x.name;
+  state.pages=x.pages;
+  state.pageIndex=x.pageIndex||0;
+  state.selected=null;
+
+  renderAll();
+
+  log("Project loaded","FILE");
+}
+
+function addPage(){
+
+  checkpoint();
+
+  state.pages.push({
+    name:"Page "+(state.pages.length+1),
+    nodes:[],
+    links:[]
+  });
+
+  state.pageIndex=state.pages.length-1;
+
+  renderAll();
+}
+
+function selectPage(i){
+
+  state.pageIndex=i;
+  state.selected=null;
+
+  renderAll();
+}
+
+
+/* =========================================================
+   LIBRARY UI
+   ========================================================= */
+
+function renderDepartments(){
+
+  const box=$("departments");
+
+  const query=$("libSearch").value
+    .toLowerCase()
+    .trim();
+
+  box.innerHTML="";
+
+  for(const [dept,parts] of Object.entries(LIB)){
+
+    const filtered=query
+      ? parts.filter(
+          p=>p.toLowerCase().includes(query)
+        )
+      : parts;
+
+    if(query && !filtered.length) continue;
+
+    const wrap=document.createElement("div");
+
+    wrap.className="dept";
+
+    if(query) wrap.classList.add("open");
+
+    const head=document.createElement("button");
+
+    head.className="deptHead";
+
+    head.innerHTML=
+      "<span>"+escapeHtml(dept)+"</span>"+
+      "<span>"+filtered.length+"</span>";
+
+    head.onclick=()=>{
+      wrap.classList.toggle("open");
+    };
+
+    const list=document.createElement("div");
+
+    list.className="parts";
+
+    filtered.forEach(name=>{
+
+      const b=document.createElement("button");
+
+      b.className="part";
+
+      b.innerHTML=
+        "<span>"+escapeHtml(name)+"</span>"+
+        "<small>IMPORT</small>";
+
+      b.onclick=()=>{
+        checkpoint();
+        addNode(name,dept);
+        log(name+" imported from "+dept,"LIB");
+      };
+
+      list.appendChild(b);
+    });
+
+    wrap.appendChild(head);
+    wrap.appendChild(list);
+
+    box.appendChild(wrap);
+  }
+}
+
+function renderSimLibrary(){
+
+  $("simLibrary").innerHTML="";
+
+  SIM_LIBRARY.forEach(x=>{
+
+    const b=document.createElement("button");
+
+    b.className="part";
+
+    b.innerHTML=
+      "<span>"+escapeHtml(x)+"</span>"+
+      "<small>OPEN</small>";
+
+    b.onclick=()=>{
+      $("simMode").textContent=x.toUpperCase();
+      log(x+" selected","SIM");
+    };
+
+    $("simLibrary").appendChild(b);
+  });
+}
+
+function renderPages(){
+
+  const box=$("pages");
+
+  box.innerHTML="";
+
+  state.pages.forEach((p,i)=>{
+
+    const b=document.createElement("button");
+
+    b.className="part";
+
+    b.style.border=
+      i===state.pageIndex
+      ? "1px solid #55e5ff"
+      : "";
+
+    b.innerHTML=
+      "<span>"+escapeHtml(p.name)+"</span>"+
+      "<small>"+p.nodes.length+" parts</small>";
+
+    b.onclick=()=>{
+      selectPage(i);
+    };
+
+    box.appendChild(b);
+  });
+}
+
+
+/* =========================================================
+   COMPONENT OPERATIONS
+   ========================================================= */
+
+function addNode(name,dept,x,y){
+
+  const p=page();
+
+  const index=p.nodes.length;
+
+  const node={
+    id:nextId(),
+    name:name,
+    dept:dept,
+    x:Number.isFinite(Number(x))
+      ? Number(x)
+      : 250+(index%5)*220,
+    y:Number.isFinite(Number(y))
+      ? Number(y)
+      : 180+Math.floor(index/5)*130,
+    r:0,
+    fixed:false
+  };
+
+  p.nodes.push(node);
+
+  state.selected=node.id;
+
+  renderAll();
+
+  log(
+    name+" added to visual engine",
+    "ENGINE"
+  );
+}
+
+function removeNode(id){
+
+  const p=page();
+
+  let n;
+
+  if(id==="selected"){
+    n=selectedNode();
+  }else{
+    n=p.nodes.find(
+      x=>x.id===id || x.name.toLowerCase()===String(id).toLowerCase()
+    );
+  }
+
+  if(!n){
+    toast("Component not found");
+    return;
+  }
+
+  p.nodes=p.nodes.filter(x=>x.id!==n.id);
+
+  p.links=p.links.filter(
+    l=>l[0]!==n.id && l[1]!==n.id
+  );
+
+  if(state.selected===n.id){
+    state.selected=null;
+  }
+
+  renderAll();
+
+  log(n.name+" removed","ENGINE");
+}
+
+function rotateNode(deg=30){
+
+  const n=selectedNode();
+
+  if(!n){
+    toast("Select a component first");
+    return;
+  }
+
+  if(n.fixed){
+    toast("Component is locked");
+    return;
+  }
+
+  n.r=(n.r+deg)%360;
+
+  renderAll();
+
+  log(n.name+" rotated "+deg+" degrees","ENGINE");
+}
+
+function fixNode(){
+
+  const n=selectedNode();
+
+  if(!n){
+    toast("Select a component first");
+    return;
+  }
+
+  n.fixed=!n.fixed;
+
+  renderAll();
+
+  log(
+    n.name+(n.fixed?" locked":" unlocked"),
+    "ENGINE"
+  );
+}
+
+function duplicateNode(){
+
+  const n=selectedNode();
+
+  if(!n){
+    toast("Select a component first");
+    return;
+  }
+
+  checkpoint();
+
+  addNode(
+    n.name,
+    n.dept,
+    n.x+40,
+    n.y+40
+  );
+}
+
+function splitNode(){
+
+  const n=selectedNode();
+
+  if(!n){
+    toast("Select a component first");
+    return;
+  }
+
+  checkpoint();
+
+  const x=n.x;
+  const y=n.y;
+
+  removeNode(n.id);
+
+  addNode(
+    n.name+" A",
+    n.dept,
+    x,
+    y
+  );
+
+  addNode(
+    n.name+" B",
+    n.dept,
+    x+210,
+    y
+  );
+
+  log(n.name+" split into editable parts","ENGINE");
+}
+
+
+/* =========================================================
+   CONNECTIONS
+   ========================================================= */
+
+function findNode(query){
+
+  const p=page();
+
+  if(!query) return null;
+
+  const q=String(query)
+    .toLowerCase()
+    .trim();
+
+  if(q==="selected"){
+    return selectedNode();
+  }
+
+  if(q==="nearest"){
+
+    const n=selectedNode();
+
+    if(!n) return null;
+
+    return p.nodes
+      .filter(x=>x.id!==n.id)
+      .sort(
+        (a,b)=>
+          distance(n,a)-distance(n,b)
+      )[0]||null;
+  }
+
+  return p.nodes.find(
+    n=>n.id===query
+  ) || p.nodes.find(
+    n=>n.name.toLowerCase()===q
+  ) || p.nodes.find(
+    n=>n.name.toLowerCase().includes(q)
+  ) || null;
+}
+
+function distance(a,b){
+
+  return Math.sqrt(
+    Math.pow(a.x-b.x,2)+
+    Math.pow(a.y-b.y,2)
+  );
+}
+
+function connect(a,b){
+
+  const p=page();
+
+  const A=findNode(a);
+  const B=findNode(b);
+
+  if(!A || !B){
+    toast("Could not find both components");
+    return false;
+  }
+
+  if(A.id===B.id){
+    toast("Cannot connect a component to itself");
+    return false;
+  }
+
+  const exists=p.links.some(
+    l=>
+      (l[0]===A.id && l[1]===B.id) ||
+      (l[0]===B.id && l[1]===A.id)
+  );
+
+  if(exists){
+    toast("Connection already exists");
+    return false;
+  }
+
+  p.links.push([A.id,B.id]);
+
+  renderAll();
+
+  log(
+    A.name+" connected to "+B.name,
+    "CONNECT"
+  );
+
+  return true;
+}
+
+function disconnect(a,b){
+
+  const p=page();
+
+  const A=findNode(a);
+  const B=findNode(b);
+
+  if(!A || !B){
+    toast("Could not find connection");
+    return;
+  }
+
+  p.links=p.links.filter(
+    l=>!(
+      (l[0]===A.id && l[1]===B.id) ||
+      (l[0]===B.id && l[1]===A.id)
+    )
+  );
+
+  renderAll();
+
+  log(
+    A.name+" disconnected from "+B.name,
+    "CONNECT"
+  );
+}
+
+function startConnectMode(){
+
+  state.connectMode=true;
+  state.connectFirst=state.selected;
+
+  toast(
+    "CONNECT mode: click the second component"
+  );
+
+  renderAll();
+}
+
+function nodeClick(ev,n){
+
+  ev.stopPropagation();
+
+  if(
+    state.connectMode &&
+    state.connectFirst &&
+    state.connectFirst!==n.id
+  ){
+
+    checkpoint();
+
+    connect(
+      state.connectFirst,
+      n.id
+    );
+
+    state.connectMode=false;
+    state.connectFirst=null;
+
+    renderAll();
+
+    return;
+  }
+
+  state.selected=n.id;
+
+  renderAll();
+}
+
+
+/* =========================================================
+   DRAGGING
+   ========================================================= */
+
+function dragStart(ev,n,el){
+
+  if(n.fixed) return;
+
+  ev.stopPropagation();
+
+  const sx=ev.clientX;
+  const sy=ev.clientY;
+
+  const ox=n.x;
+  const oy=n.y;
+
+  let moved=false;
+
+  checkpoint();
+
+  el.setPointerCapture(ev.pointerId);
+
+  function move(e){
+
+    moved=true;
+
+    n.x=
+      ox+(e.clientX-sx)/state.zoom;
+
+    n.y=
+      oy+(e.clientY-sy)/state.zoom;
+
+    draw();
+  }
+
+  function up(){
+
+    el.removeEventListener(
+      "pointermove",
+      move
+    );
+
+    el.removeEventListener(
+      "pointerup",
+      up
+    );
+
+    if(moved){
+
+      renderAll();
+
+      log(
+        n.name+" moved",
+        "ENGINE"
+      );
+
+    }else{
+
+      state.history.pop();
+
+      state.future=[];
+
+      state.selected=n.id;
+
+      renderAll();
+    }
+  }
+
+  el.addEventListener(
+    "pointermove",
+    move
+  );
+
+  el.addEventListener(
+    "pointerup",
+    up
+  );
+}
+
+
+/* =========================================================
+   DRAW ENGINE
+   ========================================================= */
+
+function draw(){
+
+  const p=page();
+
+  const wires=$("wires");
+
+  wires.innerHTML="";
+
+  for(const link of p.links){
+
+    const a=p.nodes.find(
+      n=>n.id===link[0]
+    );
+
+    const b=p.nodes.find(
+      n=>n.id===link[1]
+    );
+
+    if(!a || !b) continue;
+
+    const line=
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "line"
+      );
+
+    line.setAttribute(
+      "x1",
+      a.x+85
+    );
+
+    line.setAttribute(
+      "y1",
+      a.y+35
+    );
+
+    line.setAttribute(
+      "x2",
+      b.x+85
+    );
+
+    line.setAttribute(
+      "y2",
+      b.y+35
+    );
+
+    line.classList.add("wire");
+
+    if(
+      a.id===state.selected ||
+      b.id===state.selected
+    ){
+      line.classList.add("selected");
+    }
+
+    wires.appendChild(line);
+  }
+}
+
+
+/* =========================================================
+   RENDER NODES
+   ========================================================= */
+
+function renderNodes(){
+
+  const box=$("nodes");
+
+  box.innerHTML="";
+
+  for(const n of page().nodes){
+
+    const d=document.createElement("div");
+
+    d.className=
+      "node"+
+      (n.id===state.selected
+        ?" selected":"")+
+      (n.fixed
+        ?" fixed":"");
+
+    d.style.left=n.x+"px";
+    d.style.top=n.y+"px";
+    d.style.transform=
+      "rotate("+n.r+"deg)";
+
+    d.innerHTML=
+      '<div class="title">'+
+      escapeHtml(n.name)+
+      '</div>'+
+      '<div class="meta">'+
+      escapeHtml(n.dept)+
+      '</div>'+
+      '<div class="state">'+
+      (n.fixed?"LOCKED":"EDITABLE")+
+      " · click/drag"+
+      '</div>';
+
+    d.onpointerdown=e=>
+      dragStart(e,n,d);
+
+    d.onclick=e=>
+      nodeClick(e,n);
+
+    d.ondblclick=e=>{
+      e.stopPropagation();
+      checkpoint();
+      fixNode();
+    };
+
+    box.appendChild(d);
+  }
+}
+
+
+/* =========================================================
+   INSPECTOR
+   ========================================================= */
+
+function renderInspector(){
+
+  const n=selectedNode();
+
+  if(!n){
+
+    $("inspector").innerHTML=
+      "Nothing selected.";
+
+    $("selChip").textContent=
+      "NO SELECTION";
+
+    return;
+  }
+
+  $("selChip").textContent=
+    n.name.toUpperCase();
+
+  const links=page().links.filter(
+    l=>l[0]===n.id || l[1]===n.id
+  ).length;
+
+  $("inspector").innerHTML=
+
+    '<div class="inspectorRow">'+
+    '<span>Name</span>'+
+    '<b>'+escapeHtml(n.name)+'</b>'+
+    '</div>'+
+
+    '<div class="inspectorRow">'+
+    '<span>Department</span>'+
+    '<b>'+escapeHtml(n.dept)+'</b>'+
+    '</div>'+
+
+    '<div class="inspectorRow">'+
+    '<span>Position</span>'+
+    '<b>'+Math.round(n.x)+
+    ' , '+Math.round(n.y)+
+    '</b>'+
+    '</div>'+
+
+    '<div class="inspectorRow">'+
+    '<span>Rotation</span>'+
+    '<b>'+Math.round(n.r)+'°</b>'+
+    '</div>'+
+
+    '<div class="inspectorRow">'+
+    '<span>Connections</span>'+
+    '<b>'+links+'</b>'+
+    '</div>'+
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:9px">'+
+
+    '<button onclick="checkpoint();fixNode()">Lock</button>'+
+
+    '<button onclick="duplicateNode()">Duplicate</button>'+
+
+    '<button onclick="checkpoint();rotateNode(30)">Rotate</button>'+
+
+    '<button onclick="splitNode()">Split</button>'+
+
+    '<button onclick="checkpoint();removeNode(\'selected\')" style="grid-column:1/3">Remove</button>'+
+
+    '</div>';
+}
+
+
+/* =========================================================
+   RENDER ALL
+   ========================================================= */
+
+function renderAll(){
+
+  $("projectName").textContent=
+    state.name;
+
+  renderDepartments();
+  renderSimLibrary();
+  renderPages();
+  renderNodes();
+  renderInspector();
+  draw();
+
+  const p=page();
+
+  $("linkChip").textContent=
+    p.links.length+" LINKS";
+
+  $("rightLinks").textContent=
+    p.links.length;
+
+  $("world").style.transform=
+    "translate(-50%,-50%) scale("+
+    state.zoom+
+    ")";
+}
+
+
+/* =========================================================
+   VIEW CONTROL
+   ========================================================= */
+
+function changeZoom(factor){
+
+  state.zoom*=factor;
+
+  state.zoom=
+    Math.max(
+      .35,
+      Math.min(
+        2.5,
+        state.zoom
+      )
+    );
+
+  renderAll();
+}
+
+function fitView(){
+
+  const p=page();
+
+  if(!p.nodes.length){
+
+    state.zoom=1;
+    renderAll();
+    return;
+  }
+
+  let minX=Infinity;
+  let minY=Infinity;
+  let maxX=-Infinity;
+  let maxY=-Infinity;
+
+  p.nodes.forEach(n=>{
+
+    minX=Math.min(minX,n.x);
+    minY=Math.min(minY,n.y);
+
+    maxX=Math.max(maxX,n.x+170);
+    maxY=Math.max(maxY,n.y+70);
+
+  });
+
+  const width=maxX-minX;
+  const height=maxY-minY;
+
+  const areaWidth=
+    $("center").clientWidth-80;
+
+  const areaHeight=
+    $("center").clientHeight-100;
+
+  state.zoom=Math.max(
+    .35,
+    Math.min(
+      1.4,
+      Math.min(
+        areaWidth/width,
+        areaHeight/height
+      )
+    )
+  );
+
+  renderAll();
+
+  log("View fitted","VIEW");
+}
+
+
+/* =========================================================
+   SIMULATION / TEST
+   ========================================================= */
+
+function testModel(){
+
+  const p=page();
+
+  const issues=[];
+
+  if(!p.nodes.length){
+    issues.push("No components");
+  }
+
+  for(const link of p.links){
+
+    if(
+      !p.nodes.some(
+        n=>n.id===link[0]
+      ) ||
+      !p.nodes.some(
+        n=>n.id===link[1]
+      )
+    ){
+      issues.push(
+        "Broken connection"
+      );
+    }
+  }
+
+  const isolated=p.nodes.filter(
+    n=>
+      p.nodes.length>1 &&
+      !p.links.some(
+        l=>l[0]===n.id || l[1]===n.id
+      )
+  );
+
+  if(isolated.length){
+    issues.push(
+      isolated.length+
+      " isolated component(s)"
+    );
+  }
+
+  state.tests++;
+
+  $("checkState").textContent=
+    issues.length
+      ?"ISSUES"
+      :"PASS";
+
+  $("checkState").className=
+    issues.length
+      ?"warn"
+      :"good";
+
+  $("simChip").textContent=
+    issues.length
+      ?"ISSUES"
+      :"CHECKED";
+
+  if(issues.length){
+
+    log(
+      "Check: "+issues.join(", "),
+      "SIM"
+    );
+
+    toast(
+      "Model check found "+issues.length+" issue(s)"
+    );
+
+  }else{
+
+    log(
+      "Conceptual structural check passed",
+      "SIM"
+    );
+
+    toast(
+      "Model check passed"
+    );
+  }
+}
+
+function runSimulation(){
+
+  const p=page();
+
+  if(!p.nodes.length){
+
+    toast("Add components first");
+
+    return;
+  }
+
+  $("runState").textContent=
+    "RUNNING";
+
+  $("simChip").textContent=
+    "RUNNING";
+
+  log(
+    "Conceptual simulation started for "+
+    p.nodes.length+
+    " components",
+    "SIM"
+  );
+
+  setTimeout(()=>{
+
+    $("runState").textContent=
+      "COMPLETE";
+
+    $("simChip").textContent=
+      "COMPLETE";
+
+    log(
+      "Conceptual simulation completed",
+      "SIM"
+    );
+
+  },1200);
+}
+
+
+/* =========================================================
+   LOCAL COMMAND ENGINE
+   ========================================================= */
+
+function parseLocalCommand(text){
+
+  const x=text.toLowerCase();
+
+  if(/\bundo\b/.test(x))
+    return "UNDO";
+
+  if(/\bredo\b/.test(x))
+    return "REDO";
+
+  if(/\b(test|check|validate)\b/.test(x)){
+
+    testModel();
+
+    return "LOCAL";
+  }
+
+  if(/\b(run|simulate)\b/.test(x)){
+
+    runSimulation();
+
+    return "LOCAL";
+  }
+
+  if(/\bsplit\b/.test(x)){
+
+    splitNode();
+
+    return "LOCAL";
+  }
+
+  if(/\brotate\b/.test(x)){
+
+    checkpoint();
+
+    rotateNode(30);
+
+    return "LOCAL";
+  }
+
+  if(/\bduplicate\b/.test(x)){
+
+    duplicateNode();
+
+    return "LOCAL";
+  }
+
+  if(/\b(lock|fix)\b/.test(x)){
+
+    checkpoint();
+
+    fixNode();
+
+    return "LOCAL";
+  }
+
+  if(/\b(show all|show everything)\b/.test(x)){
+
+    fitView();
+
+    return "LOCAL";
+  }
+
+  if(/\bdisconnect\b/.test(x)){
+
+    const m=x.match(
+      /disconnect\s+(.+?)\s+(?:from|and)\s+(.+)/
+    );
+
+    if(m){
+
+      checkpoint();
+
+      disconnect(
+        cleanCommandName(m[1]),
+        cleanCommandName(m[2])
+      );
+
+    }
+
+    return "LOCAL";
+  }
+
+  if(/\bconnect\b/.test(x)){
+
+    const m=x.match(
+      /connect\s+(.+?)\s+(?:to|with|and)\s+(.+)/
+    );
+
+    if(m){
+
+      checkpoint();
+
+      connect(
+        cleanCommandName(m[1]),
+        cleanCommandName(m[2])
+      );
+
+    }else{
+
+      startConnectMode();
+    }
+
+    return "LOCAL";
+  }
+
+  if(/\b(remove|delete)\b/.test(x)){
+
+    checkpoint();
+
+    removeNode("selected");
+
+    return "LOCAL";
+  }
+
+  const m=x.match(
+    /(?:add|import|create|place)\s+(?:a|an)?\s*(.+)/
+  );
+
+  if(m){
+
+    let q=m[1]
+      .replace(/\binto\b.*$/,"")
+      .trim();
+
+    const found=findLibrary(q);
+
+    if(found){
+
+      checkpoint();
+
+      addNode(
+        found.name,
+        found.dept
+      );
+
+      return "LOCAL";
+    }
+  }
+
+  return null;
+}
+
+function cleanCommandName(x){
+
+  return x
+    .replace(/\bthe\b/g,"")
+    .replace(/\bcomponent\b/g,"")
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function findLibrary(query){
+
+  const q=query.toLowerCase();
+
+  const all=[];
+
+  for(
+    const [dept,parts]
+    of Object.entries(LIB)
+  ){
+
+    for(const name of parts){
+
+      all.push({
+        name:name,
+        dept:dept
+      });
+    }
+  }
+
+  return all.find(
+    x=>x.name.toLowerCase()===q
+  ) ||
+  all.find(
+    x=>q.includes(
+      x.name.toLowerCase()
+    )
+  ) ||
+  all.find(
+    x=>x.name.toLowerCase().includes(q)
+  );
+}
+
+
+/* =========================================================
+   BACKEND AI
+   ========================================================= */
+
+async function submitPrompt(){
+
+  const input=$("prompt");
+
+  const text=input.value.trim();
+
+  if(!text) return;
+
+  input.value="";
+
+  log(text,"YOU");
+
+  const local=parseLocalCommand(text);
+
+  if(local==="UNDO"){
+
+    undo();
+
+    return;
+  }
+
+  if(local==="REDO"){
+
+    redo();
+
+    return;
+  }
+
+  if(local==="LOCAL"){
+
+    return;
+  }
+
+  setBusy(true);
+
+  try{
+
+    const response=
+      await fetch(
+        "/api",
+        {
+          method:"POST",
+          headers:{
+            "content-type":
+              "application/json"
+          },
+
+          body:JSON.stringify({
+            prompt:text,
+
+            state:{
+              name:state.name,
+
+              page:page(),
+
+              selected:
+                selectedNode()
+                ?.name || null,
+
+              library:LIB
+            }
+          })
+        }
+      );
+
+    const data=
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        "Backend error"
+      );
+    }
+
+    if(
+      Array.isArray(data.actions) &&
+      data.actions.length
+    ){
+
+      checkpoint();
+
+      applyAIActions(
+        data.actions
+      );
+    }
+
+    log(
+      data.reply ||
+      "Command completed",
+      "AI"
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    log(
+      "AI backend unavailable: "+
+      error.message,
+      "ERR"
+    );
+
+    toast(
+      "Backend unavailable — local commands still work"
+    );
+
+  }finally{
+
+    setBusy(false);
+  }
+}
+
+function setBusy(value){
+
+  $("status").textContent=
+    value
+      ?"PROCESSING"
+      :"READY";
+
+  $("led").style.background=
+    value
+      ?"var(--yellow)"
+      :"var(--green)";
+}
+
+function applyAIActions(actions){
+
+  for(const action of actions){
+
+    const type=
+      action.type ||
+      action.action;
+
+    if(type==="add"){
+
+      const found=
+        findLibrary(
+          action.name ||
+          action.component ||
+          ""
+        );
+
+      addNode(
+        found
+          ?found.name
+          :(action.name ||
+            action.component ||
+            "Component"),
+
+        found
+          ?found.dept
+          :(action.department ||
+            "GENERAL"),
+
+        action.x,
+        action.y
+      );
+
+    }
+
+    else if(type==="connect"){
+
+      connect(
+        action.source ||
+        action.from ||
+        "selected",
+
+        action.target ||
+        action.to ||
+        "nearest"
+      );
+
+    }
+
+    else if(type==="disconnect"){
+
+      disconnect(
+        action.source ||
+        action.from,
+
+        action.target ||
+        action.to
+      );
+
+    }
+
+    else if(type==="remove"){
+
+      removeNode(
+        action.target ||
+        "selected"
+      );
+
+    }
+
+    else if(type==="split"){
+
+      splitNode();
+
+    }
+
+    else if(type==="rotate"){
+
+      rotateNode(
+        Number(
+          action.angle ||
+          action.degrees ||
+          30
+        )
+      );
+
+    }
+
+    else if(type==="duplicate"){
+
+      duplicateNode();
+
+    }
+
+    else if(type==="fix"){
+
+      fixNode();
+
+    }
+
+    else if(
+      type==="showall" ||
+      type==="show_all"
+    ){
+
+      fitView();
+
+    }
+
+    else if(
+      type==="check" ||
+      type==="test"
+    ){
+
+      testModel();
+
+    }
+
+    else if(type==="run"){
+
+      runSimulation();
+
+    }
+
+    else if(
+      type==="center" ||
+      type==="reset"
+    ){
+
+      fitView();
+
+    }
+
+    else if(type==="zoom"){
+
+      changeZoom(
+        Number(
+          action.factor ||
+          action.value ||
+          1.15
+        )
+      );
+
+    }
+
+    else if(type==="move"){
+
+      const n=
+        findNode(
+          action.target ||
+          "selected"
+        );
+
+      if(
+        n &&
+        !n.fixed
+      ){
+
+        if(
+          Number.isFinite(
+            Number(action.x)
+          )
+        ){
+          n.x=Number(action.x);
+        }
+
+        if(
+          Number.isFinite(
+            Number(action.y)
+          )
+        ){
+          n.y=Number(action.y);
+        }
+      }
+
+    }
+
+    else if(type==="align"){
+
+      const arr=page().nodes;
+
+      arr.forEach(
+        (n,i)=>{
+          n.x=
+            180+
+            (i%5)*220;
+
+          n.y=
+            180+
+            Math.floor(i/5)*130;
+        }
+      );
+    }
+
+    else if(type==="measure"){
+
+      const A=
+        findNode(
+          action.source ||
+          action.from
+        );
+
+      const B=
+        findNode(
+          action.target ||
+          action.to
+        );
+
+      if(A&&B){
+
+        toast(
+          "Distance: "+
+          Math.round(
+            distance(A,B)
+          )+
+          " units"
+        );
+      }
+    }
+  }
+
+  renderAll();
+}
+
+
+/* =========================================================
+   VOICE
+   ========================================================= */
+
+function toggleVoice(){
+
+  const SpeechRecognition=
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if(!SpeechRecognition){
+
+    toast(
+      "Speech recognition is not available in this browser"
+    );
+
+    return;
+  }
+
+  if(state.voice){
+
+    state.voice=false;
+
+    try{
+      window._davidRecognition?.stop();
+    }catch(e){}
+
+    $("mic").classList.remove("on");
+
+    $("voiceMode").textContent=
+      "OFF";
+
+    toast("Voice off");
+
+    return;
+  }
+
+  const recognition=
+    new SpeechRecognition();
+
+  recognition.lang="en-IN";
+
+  recognition.continuous=true;
+
+  recognition.interimResults=false;
+
+  recognition.onresult=e=>{
+
+    for(
+      let i=e.resultIndex;
+      i<e.results.length;
+      i++
+    ){
+
+      if(!e.results[i].isFinal)
+        continue;
+
+      let text=
+        e.results[i][0]
+        .transcript
+        .trim();
+
+      log(text,"VOICE");
+
+      /*
+        Once voice is activated,
+        ordinary commands are accepted.
+        "Hey David" is also supported.
+      */
+
+      text=text.replace(
+        /^(hey\s+)?david[\s,]*/i,
+        ""
+      ).trim();
+
+      if(!text) continue;
+
+      $("prompt").value=text;
+
+      submitPrompt();
+    }
+  };
+
+  recognition.onerror=e=>{
+
+    log(
+      "Voice: "+e.error,
+      "VOICE"
+    );
+  };
+
+  recognition.onend=()=>{
+
+    if(state.voice){
+
+      try{
+        recognition.start();
+      }catch(e){}
+    }
+  };
+
+  window._davidRecognition=
+    recognition;
+
+  state.voice=true;
+
+  recognition.start();
+
+  $("mic").classList.add("on");
+
+  $("voiceMode").textContent=
+    "LISTENING";
+
+  toast(
+    "Voice listening enabled"
+  );
+}
+
+
+/* =========================================================
+   GESTURE CONTROL
+   ========================================================= */
+
+let cameraStream=null;
+let gestureFrame=null;
+let gestureRecognizer=null;
+let lastGesture="";
+let lastGestureTime=0;
+
+async function toggleCamera(){
+
+  if(cameraStream){
+
+    cameraStream
+      .getTracks()
+      .forEach(
+        track=>track.stop()
+      );
+
+    cameraStream=null;
+
+    $("camPanel")
+      .classList.remove("on");
+
+    $("cameraBtn")
+      .textContent=
+      "Enable hands";
+
+    if(gestureFrame){
+
+      cancelAnimationFrame(
+        gestureFrame
+      );
+
+      gestureFrame=null;
+    }
+
+    log(
+      "Hand tracking disabled",
+      "GESTURE"
+    );
+
+    return;
+  }
+
+  try{
+
+    cameraStream=
+      await navigator.mediaDevices
+        .getUserMedia({
+          video:true,
+          audio:false
+        });
+
+    $("video").srcObject=
+      cameraStream;
+
+    $("camPanel")
+      .classList.add("on");
+
+    $("cameraBtn")
+      .textContent=
+      "Disable hands";
+
+    await initializeGestures();
+
+  }catch(error){
+
+    console.error(error);
+
+    toast(
+      "Camera permission was not granted"
+    );
+  }
+}
+
+async function initializeGestures(){
+
+  try{
+
+    const mp=
+      await import(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm"
+      );
+
+    const vision=
+      await mp.FilesetResolver
+        .forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm"
+        );
+
+    gestureRecognizer=
+      await mp.GestureRecognizer
+        .createFromOptions(
+          vision,
+          {
+            baseOptions:{
+              modelAssetPath:
+                "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task"
+            },
+
+            runningMode:"VIDEO",
+
+            numHands:2
+          }
+        );
+
+    log(
+      "Hand tracking ready",
+      "GESTURE"
+    );
+
+    runGestureLoop();
+
+  }catch(error){
+
+    console.error(error);
+
+    log(
+      "Gesture engine could not initialize",
+      "ERR"
+    );
+
+    toast(
+      "Gesture model could not be loaded"
+    );
+  }
+}
+
+function runGestureLoop(){
+
+  if(
+    !gestureRecognizer ||
+    !cameraStream
+  ){
+    return;
+  }
+
+  const now=
+    performance.now();
+
+  const result=
+    gestureRecognizer
+      .recognizeForVideo(
+        $("video"),
+        now
+      );
+
+  const gesture=
+    result.gestures
+      ?.[0]
+      ?.[0]
+      ?.categoryName || "";
+
+  if(
+    gesture &&
+    gesture!==lastGesture &&
+    now-lastGestureTime>900
+  ){
+
+    lastGesture=gesture;
+    lastGestureTime=now;
+
+    handleGesture(
+      gesture
+    );
+  }
+
+  gestureFrame=
+    requestAnimationFrame(
+      runGestureLoop
+    );
+}
+
+function handleGesture(g){
+
+  if(g==="Pointing_Up"){
+
+    toast(
+      "Pointing detected — selection mode"
+    );
+  }
+
+  else if(g==="Open_Palm"){
+
+    fitView();
+
+  }
+
+  else if(g==="Closed_Fist"){
+
+    splitNode();
+
+  }
+
+  else if(g==="Victory"){
+
+    checkpoint();
+
+    rotateNode(30);
+
+  }
+
+  else if(g==="Thumb_Up"){
+
+    testModel();
+
+  }
+
+  else if(g==="Thumb_Down"){
+
+    runSimulation();
+
+  }
+
+  else if(g==="ILoveYou"){
+
+    fitView();
+
+  }
+}
+
+
+/* =========================================================
+   GUIDE
+   ========================================================= */
+
+function openGuide(){
+
+  openDialog(
+
+    "<h2>DAVID_AI Control Guide</h2>"+
+
+    "<p><b>Prompt:</b> Describe a complete operation in natural language. The backend converts the instruction into structured design actions.</p>"+
+
+    "<p><b>Examples:</b></p>"+
+
+    "<p>"+
+    "Create a DC motor system with battery, motor controller and DC motor; connect battery to controller and controller to motor; test it."
+    +"</p>"+
+
+    "<p>"+
+    "Create an automobile drivetrain with engine, transmission, differential, drive shaft and four wheels."
+    +"</p>"+
+
+    "<p>"+
+    "Import a pump and tank, connect the pump to the tank, then test the model."
+    +"</p>"+
+
+    "<p><b>Manual connection:</b> press CONNECT and click two components.</p>"+
+
+    "<p><b>Voice:</b> activate the circular microphone and speak commands. Both normal commands and commands beginning with “Hey David” are supported.</p>"+
+
+    "<p><b>Gestures:</b> camera hand tracking can control selection-related actions, split, rotate, test, run and view operations.</p>"+
+
+    "<p><b>Undo / Redo:</b> toolbar buttons and Ctrl+Z / Ctrl+Y are supported.</p>"+
+
+    "<p><b>Simulation:</b> the current browser simulation is a conceptual structural simulation. It does not claim physical hardware validation.</p>"+
+
+    "<button onclick='closeModal()'>Close</button>"
+  );
+}
+
+
+/* =========================================================
+   MODAL / TOAST / LOG
+   ========================================================= */
+
+function openDialog(html){
+
+  $("dialog").innerHTML=html;
+
+  $("modal")
+    .classList.add("open");
+}
+
+function closeModal(){
+
+  $("modal")
+    .classList.remove("open");
+}
+
+function toast(message){
+
+  const t=$("toast");
+
+  t.textContent=message;
+
+  t.classList.add("show");
+
+  clearTimeout(
+    window._toastTimer
+  );
+
+  window._toastTimer=
+    setTimeout(
+      ()=>t.classList.remove("show"),
+      2200
+    );
+}
+
+function log(message,type="SYS"){
+
+  const box=$("activity");
+
+  const row=document.createElement("div");
+
+  row.className="log";
+
+  row.innerHTML=
+    "<b>"+escapeHtml(type)+"</b> "+
+    escapeHtml(message);
+
+  box.prepend(row);
+
+  while(
+    box.children.length>80
+  ){
+    box.lastChild.remove();
+  }
+}
+
+
+/* =========================================================
+   SECURITY / HTML ESCAPE
+   ========================================================= */
+
+function escapeHtml(value){
+
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+/* =========================================================
+   KEYBOARD CONTROLS
+   ========================================================= */
+
+$("prompt")
+  .addEventListener(
+    "keydown",
+    e=>{
+
+      if(
+        (e.ctrlKey||e.metaKey) &&
+        e.key==="Enter"
+      ){
+
+        e.preventDefault();
+
+        submitPrompt();
+
+        return;
+      }
+
+      if(
+        e.key==="Enter" &&
+        !e.shiftKey
+      ){
+
+        e.preventDefault();
+
+        submitPrompt();
+      }
+    }
+  );
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      (e.ctrlKey||e.metaKey) &&
+      e.key.toLowerCase()==="z"
+    ){
+
+      e.preventDefault();
+
+      undo();
+    }
+
+    if(
+      (e.ctrlKey||e.metaKey) &&
+      e.key.toLowerCase()==="y"
+    ){
+
+      e.preventDefault();
+
+      redo();
+    }
+
+    if(e.key==="Escape"){
+
+      state.connectMode=false;
+      state.connectFirst=null;
+
+      closeModal();
+
+      renderAll();
+    }
+  }
+);
+
+
+/* =========================================================
+   CENTER CLICK
+   ========================================================= */
+
+$("center").addEventListener(
+  "click",
+  e=>{
+
+    if(
+      e.target.closest(".node") ||
+      e.target.closest(".tools") ||
+      e.target.closest(".hud")
+    ){
+      return;
+    }
+
+    if(state.connectMode){
+
+      state.connectMode=false;
+      state.connectFirst=null;
+
+      renderAll();
+    }
+  }
+);
+
+
+/* =========================================================
+   BEFORE UNLOAD
+   ========================================================= */
+
+window.addEventListener(
+  "beforeunload",
+  ()=>{
+
+    if(cameraStream){
+
+      cameraStream
+        .getTracks()
+        .forEach(
+          track=>track.stop()
+        );
+    }
+
+    try{
+      window._davidRecognition?.stop();
+    }catch(e){}
+  }
+);
+
+
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
+
+renderAll();
+
+renderSimLibrary();
+
+log(
+  "DAVID_AI workspace initialized",
+  "SYS"
+);
+
+</script>
+
+</body>
+</html>
