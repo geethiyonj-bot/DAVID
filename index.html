@@ -1,0 +1,353 @@
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DAVID_AI — Innovation Command Center</title>
+<style>
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:Inter,Segoe UI,Arial,sans-serif;background:#030812;color:#dff7ff}
+body{background:
+radial-gradient(circle at 50% 45%,rgba(0,210,255,.10),transparent 24%),
+radial-gradient(circle at 15% 20%,rgba(60,80,255,.08),transparent 28%),
+linear-gradient(135deg,#02050b,#07101c 55%,#02060d)}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.app{height:100vh;width:100vw;display:grid;grid-template-columns:82px 1fr;grid-template-rows:62px 1fr 78px;position:relative}
+.app:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(80,200,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(80,200,255,.025) 1px,transparent 1px);background-size:42px 42px}
+.top{grid-column:1/3;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid rgba(90,220,255,.2);background:rgba(2,8,18,.82);backdrop-filter:blur(16px);z-index:3}
+.brand{display:flex;align-items:center;gap:13px;font-weight:800;letter-spacing:3px;font-size:19px}.brandDot{width:29px;height:29px;border-radius:50%;border:1px solid #64e8ff;box-shadow:0 0 20px #00bfff inset,0 0 18px #00bfff;position:relative}.brandDot:after{content:"";position:absolute;inset:7px;border-radius:50%;background:#8ef4ff;box-shadow:0 0 13px #8ef4ff}
+.status{display:flex;align-items:center;gap:10px;color:#8faebe;font-size:12px}.led{width:8px;height:8px;border-radius:50%;background:#32f5a0;box-shadow:0 0 12px #32f5a0}.clock{font-variant-numeric:tabular-nums;color:#c9f6ff;margin-left:12px}
+.side{grid-row:2/4;display:flex;flex-direction:column;align-items:center;padding:12px 8px;border-right:1px solid rgba(90,220,255,.18);background:rgba(2,8,18,.72);z-index:3;gap:8px}
+.nav{width:62px;height:56px;border:1px solid transparent;background:transparent;color:#7291a3;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:.2s}.nav span{font-size:19px}.nav small{font-size:8px;letter-spacing:.5px}.nav:hover,.nav.active{color:#d9fbff;border-color:rgba(53,220,255,.45);background:rgba(0,190,255,.08);box-shadow:0 0 18px rgba(0,190,255,.12)}
+.main{grid-column:2;grid-row:2;position:relative;min-width:0;min-height:0;padding:18px;z-index:2}
+.screen{height:100%;width:100%;display:none;min-height:0}.screen.active{display:grid}
+.home{grid-template-columns:270px minmax(360px,1fr) 290px;grid-template-rows:1fr;gap:16px}
+.panel{border:1px solid rgba(90,220,255,.19);background:linear-gradient(145deg,rgba(10,24,39,.78),rgba(2,10,20,.72));border-radius:18px;box-shadow:inset 0 0 35px rgba(0,180,255,.025),0 8px 30px rgba(0,0,0,.2);overflow:hidden;min-height:0}
+.panelHead{height:44px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(90,220,255,.12);color:#8bdff4;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+.panelBody{padding:13px;overflow:hidden;height:calc(100% - 44px)}
+.item{padding:11px 12px;margin-bottom:8px;border:1px solid rgba(100,200,255,.11);border-radius:11px;background:rgba(0,110,160,.045);font-size:12px;color:#abc8d5}.item b{color:#e4fbff;display:block;margin-bottom:4px}.item span{font-size:10px;color:#66899a}
+.chip{display:inline-flex;padding:5px 8px;border-radius:20px;border:1px solid rgba(75,210,255,.22);color:#82d9ed;font-size:9px;margin:3px}
+.center{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}.core{width:min(32vw,330px);height:min(32vw,330px);border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center}
+.ring{position:absolute;border-radius:50%;border:1px solid rgba(70,225,255,.5);animation:spin 15s linear infinite}.r1{inset:0;box-shadow:0 0 50px rgba(0,200,255,.08)}.r2{inset:12%;border-style:dashed;animation-duration:10s;animation-direction:reverse}.r3{inset:23%;border-color:rgba(100,170,255,.3);animation-duration:7s}
+.orb{width:38%;height:38%;border-radius:50%;background:radial-gradient(circle,#d9ffff 0,#4beaff 12%,#00a9ef 38%,#073e65 65%,transparent 70%);box-shadow:0 0 25px #35e7ff,0 0 70px rgba(0,185,255,.55),0 0 130px rgba(0,130,255,.22);animation:pulse 2.5s ease-in-out infinite}
+.ray{position:absolute;width:46%;height:1px;background:linear-gradient(90deg,transparent,#54eaff,transparent);transform-origin:center}
+.ray.a{transform:rotate(20deg)}.ray.b{transform:rotate(110deg)}.ray.c{transform:rotate(200deg)}.ray.d{transform:rotate(290deg)}
+.coreLabel{position:absolute;bottom:18px;text-align:center;font-size:10px;letter-spacing:3px;color:#7bcfe1}.wake{position:absolute;top:18px;text-align:center;font-size:11px;color:#9bc7d6}.wake strong{color:#e4fcff}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{50%{transform:scale(1.13);filter:brightness(1.25)}}
+.mic{position:absolute;bottom:12%;width:76px;height:76px;border-radius:50%;border:1px solid #61eaff;background:rgba(0,160,220,.09);color:#cfffff;box-shadow:0 0 25px rgba(0,220,255,.3),inset 0 0 18px rgba(0,220,255,.12);font-size:30px}.mic:hover{box-shadow:0 0 38px rgba(0,220,255,.5),inset 0 0 25px rgba(0,220,255,.18)}.mic.listening{animation:micPulse 1s infinite;background:rgba(0,220,255,.2)}@keyframes micPulse{50%{transform:scale(1.08);box-shadow:0 0 55px rgba(0,230,255,.65)}}
+.bottom{grid-column:2;grid-row:3;display:flex;align-items:center;gap:10px;padding:11px 18px;border-top:1px solid rgba(90,220,255,.16);background:rgba(2,8,18,.85);z-index:3}.prompt{flex:1;height:50px;border:1px solid rgba(80,215,255,.22);background:#06111d;border-radius:15px;color:#e8fbff;padding:0 16px;outline:none}.prompt:focus{border-color:#4beaff;box-shadow:0 0 20px rgba(0,210,255,.08)}.send{height:50px;padding:0 20px;border-radius:14px;border:1px solid #37d9ff;background:rgba(0,180,230,.12);color:#dffcff;font-weight:700}.send:hover{background:rgba(0,190,240,.22)}
+/* internal pages */
+.workspace{grid-template-columns:210px 1fr 250px;gap:14px}.workspaceWide{grid-template-columns:1fr}.canvas{position:relative;background:radial-gradient(circle at 50% 50%,rgba(0,190,255,.08),transparent 35%),#030b13;border-radius:18px;border:1px solid rgba(80,210,255,.18);overflow:hidden}.canvas:before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(80,200,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(80,200,255,.055) 1px,transparent 1px);background-size:30px 30px}.node{position:absolute;min-width:120px;padding:13px;border:1px solid #35dfff;background:rgba(4,30,46,.9);border-radius:12px;text-align:center;box-shadow:0 0 22px rgba(0,210,255,.12);font-size:11px}.node small{display:block;color:#6d9baa;margin-top:5px}.wire{position:absolute;height:1px;background:#43ddff;box-shadow:0 0 7px #43ddff;transform-origin:left center}
+.code{height:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px}.editor{height:100%;padding:15px;background:#020911;border:1px solid rgba(70,210,255,.16);border-radius:16px;color:#9eeeff;font:12px/1.6 Consolas,monospace;white-space:pre;overflow:auto}.console{height:100%;padding:15px;border:1px solid rgba(70,210,255,.16);border-radius:16px;background:#030b13;color:#91d3e2;font:12px/1.6 Consolas,monospace}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;height:100%}.card{padding:16px;border:1px solid rgba(70,210,255,.17);background:rgba(8,24,38,.72);border-radius:15px}.card h3{font-size:13px;margin:0 0 8px;color:#e5fbff}.card p{font-size:10px;line-height:1.5;color:#7e9daa}.bigNumber{font-size:28px;color:#66eaff;font-weight:700;margin:10px 0}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}.tool{padding:8px 10px;border:1px solid rgba(80,210,255,.2);background:#061421;color:#9bd8e7;border-radius:9px;font-size:10px}.tool:hover{border-color:#42ddff;color:#eaffff}
+.log{height:100%;padding:12px;overflow:hidden}.logline{padding:9px 0;border-bottom:1px solid rgba(80,210,255,.08);font-size:10px;color:#83a9b5}.logline b{color:#58e4ff;margin-right:8px}
+@media(max-width:1050px){.home{grid-template-columns:210px 1fr 220px}.cards{grid-template-columns:repeat(2,1fr)}} 
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div class="brand"><div class="brandDot"></div>DAVID_AI</div>
+  <div class="status"><i class="led"></i><span id="status">SYSTEM ONLINE · READY</span><span class="clock" id="clock">00:00:00</span></div>
+</header>
+
+<aside class="side">
+  <button class="nav active" data-screen="home"><span>◉</span><small>HOME</small></button>
+  <button class="nav" data-screen="file"><span>▣</span><small>FILE</small></button>
+  <button class="nav" data-screen="design"><span>⌬</span><small>DESIGN</small></button>
+  <button class="nav" data-screen="visual"><span>◇</span><small>VISUAL</small></button>
+  <button class="nav" data-screen="code"><span>&lt;/&gt;</span><small>CODE</small></button>
+  <button class="nav" data-screen="cad"><span>△</span><small>CAD</small></button>
+  <button class="nav" data-screen="simulation"><span>∿</span><small>SIM</small></button>
+  <button class="nav" data-screen="library"><span>⊞</span><small>LIBRARY</small></button>
+  <button class="nav" data-screen="gesture"><span>✋</span><small>GESTURE</small></button>
+</aside>
+
+<main class="main">
+
+<section id="home" class="screen active home">
+  <div class="panel">
+    <div class="panelHead">Project <span>LIVE</span></div>
+    <div class="panelBody">
+      <div class="item"><b>Current Project</b>Innovation Prototype<span>Page 01 · editable</span></div>
+      <div class="item"><b>Active Engine</b>Visual Engineering<span>Design → Check → Run</span></div>
+      <div class="item"><b>Model State</b><span id="modelState">No physical hardware verified</span></div>
+      <div style="margin-top:13px">
+        <span class="chip">EEE</span><span class="chip">ECE</span><span class="chip">CSE</span><span class="chip">CIVIL</span><span class="chip">MECH</span><span class="chip">AERO</span><span class="chip">SPACE</span><span class="chip">SCIENCE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel center">
+    <div class="wake">VOICE CORE · <strong>SAY “HEY DAVID”</strong></div>
+    <div class="core">
+      <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+      <div class="ray a"></div><div class="ray b"></div><div class="ray c"></div><div class="ray d"></div>
+      <div class="orb"></div>
+      <div class="coreLabel">INNOVATION COMMAND CORE</div>
+    </div>
+    <button class="mic" id="mic" title="Activate microphone">◉</button>
+  </div>
+
+  <div class="panel">
+    <div class="panelHead">Activity <span id="activityCount">00</span></div>
+    <div class="panelBody log" id="homeLog">
+      <div class="logline"><b>READY</b>System initialized</div>
+      <div class="logline"><b>VOICE</b>Microphone waiting</div>
+      <div class="logline"><b>ENGINE</b>Design workspace available</div>
+      <div class="logline"><b>AI</b>Awaiting instruction</div>
+    </div>
+  </div>
+</section>
+
+<section id="file" class="screen workspace">
+  <div class="panel"><div class="panelHead">File Control</div><div class="panelBody">
+    <button class="tool" style="width:100%;margin-bottom:8px" onclick="newProject()">＋ BLANK MODEL</button>
+    <button class="tool" style="width:100%;margin-bottom:8px" onclick="saveProject()">⇩ SAVE MODEL</button>
+    <button class="tool" style="width:100%;margin-bottom:8px" onclick="loadProject()">⇧ LOAD MODEL</button>
+    <button class="tool" style="width:100%" onclick="exportProject()">⬡ EXPORT JSON</button>
+  </div></div>
+  <div class="panel"><div class="panelHead">Project Workspace</div><div class="panelBody">
+    <div class="cards">
+      <div class="card"><h3>Project</h3><div class="bigNumber" id="projectName">01</div><p>Innovation Prototype</p></div>
+      <div class="card"><h3>Pages</h3><div class="bigNumber">01</div><p>Multiple editable pages can be added.</p></div>
+      <div class="card"><h3>Components</h3><div class="bigNumber" id="componentCount">00</div><p>Imported engineering elements.</p></div>
+      <div class="card"><h3>Connections</h3><div class="bigNumber" id="connectionCount">00</div><p>Logical model connections.</p></div>
+    </div>
+  </div></div>
+  <div class="panel"><div class="panelHead">File Information</div><div class="panelBody">
+    <div class="item"><b>Storage</b>Browser project state</div>
+    <div class="item"><b>Safety</b>API keys are never stored in this page.</div>
+    <div class="item"><b>Revision</b>DAVID_AI prototype workspace</div>
+  </div></div>
+</section>
+
+<section id="design" class="screen workspace">
+  <div class="panel"><div class="panelHead">Design Tools</div><div class="panelBody">
+    <div class="toolbar">
+      <button class="tool" onclick="addNode('NAND Gate')">NAND</button><button class="tool" onclick="addNode('Resistor')">R</button><button class="tool" onclick="addNode('Capacitor')">C</button><button class="tool" onclick="addNode('Sensor')">SENSOR</button><button class="tool" onclick="addNode('Motor')">MOTOR</button><button class="tool" onclick="addNode('Controller')">CPU</button>
+    </div>
+    <div class="item"><b>AI Design</b>Describe what you want in the bottom command bar.</div>
+    <div class="item"><b>Connection</b>Use visual engine to connect components.</div>
+  </div></div>
+  <div class="canvas" id="designCanvas"></div>
+  <div class="panel"><div class="panelHead">Design Inspector</div><div class="panelBody">
+    <div class="item"><b>Selected</b><span id="selected">None</span></div>
+    <div class="item"><b>Properties</b>Position · rotation · type · state</div>
+    <button class="tool" onclick="splitModel()">SPLIT</button>
+    <button class="tool" onclick="rotateModel()">ROTATE</button>
+    <button class="tool" onclick="checkModel()">CHECK</button>
+  </div></div>
+</section>
+
+<section id="visual" class="screen workspace">
+  <div class="panel"><div class="panelHead">Visual Engine</div><div class="panelBody">
+    <div class="item"><b>SELECT</b>Choose a component</div>
+    <div class="item"><b>SPLIT</b>Separate model elements</div>
+    <div class="item"><b>ROTATE</b>Rotate selected element</div>
+    <div class="item"><b>CONNECT</b>Join ports using visual lines</div>
+    <div class="item"><b>RUN</b>Transfer to simulation</div>
+  </div></div>
+  <div class="canvas" id="visualCanvas">
+    <div class="node" style="left:22%;top:32%">INPUT<small>PORT A</small></div>
+    <div class="node" style="left:55%;top:48%">PROCESS<small>CORE</small></div>
+    <div class="node" style="left:35%;top:68%">OUTPUT<small>PORT B</small></div>
+    <div class="wire" style="left:34%;top:39%;width:22%;transform:rotate(19deg)"></div>
+    <div class="wire" style="left:59%;top:58%;width:17%;transform:rotate(137deg)"></div>
+  </div>
+  <div class="panel"><div class="panelHead">Visual State</div><div class="panelBody">
+    <div class="item"><b>MODE</b>Interactive prototype</div>
+    <div class="item"><b>OBJECTS</b>3 visual objects</div>
+    <div class="item"><b>WIRES</b>2 logical paths</div>
+    <button class="tool" onclick="runSimulation()">▶ RUN MODEL</button>
+  </div></div>
+</section>
+
+<section id="code" class="screen code">
+  <div class="editor" id="editor"># DAVID_AI generated prototype
+# Python / C / Java compatible design workspace
+
+def build_model():
+    model = {
+        "name": "Innovation Prototype",
+        "components": [
+            {"type": "NAND_Gate", "id": "U1"},
+            {"type": "Resistor", "id": "R1"},
+            {"type": "Capacitor", "id": "C1"}
+        ],
+        "connections": [
+            ["U1.OUT", "R1.IN"],
+            ["R1.OUT", "C1.IN"]
+        ]
+    }
+    return model
+
+model = build_model()
+print("MODEL READY")</div>
+  <div class="console" id="console">DAVID_AI CODE ENGINE
+────────────────────────────
+STATUS: READY
+
+> Model graph loaded.
+> Python generation available.
+> Simulation bridge waiting.
+
+Use the command bar to request:
+“create Python code for this model”
+or
+“run the model”</div>
+</section>
+
+<section id="cad" class="screen workspaceWide">
+  <div class="panel"><div class="panelHead">CAD / Mechanical Design</div><div class="panelBody">
+    <div class="cards">
+      <div class="card"><h3>Sketch</h3><div class="bigNumber">◇</div><p>2D geometry and construction guides.</p></div>
+      <div class="card"><h3>Assembly</h3><div class="bigNumber">◎</div><p>Separate parts, joints and rotations.</p></div>
+      <div class="card"><h3>Machine</h3><div class="bigNumber">⚙</div><p>Automobile, aircraft and mechanical parts.</p></div>
+      <div class="card"><h3>Pipeline</h3><div class="bigNumber">⇢</div><p>Civil and fluid-system components.</p></div>
+    </div>
+  </div></div>
+</section>
+
+<section id="simulation" class="screen workspaceWide">
+  <div class="panel"><div class="panelHead">Simulation Control</div><div class="panelBody">
+    <div class="toolbar"><button class="tool" onclick="checkModel()">CHECK MODEL</button><button class="tool" onclick="runSimulation()">▶ START</button><button class="tool" onclick="stopSimulation()">■ STOP</button><button class="tool" onclick="resetSimulation()">↻ RESET</button></div>
+    <div class="cards">
+      <div class="card"><h3>Design Validation</h3><div class="bigNumber" id="simCheck">READY</div><p>Logical model inspection.</p></div>
+      <div class="card"><h3>Execution</h3><div class="bigNumber" id="simRun">IDLE</div><p>Prototype simulation state.</p></div>
+      <div class="card"><h3>Signals</h3><div class="bigNumber">07</div><p>Reserved signal channels.</p></div>
+      <div class="card"><h3>Safety</h3><div class="bigNumber">UI</div><p>Simulation does not prove physical hardware safety.</p></div>
+    </div>
+  </div></div>
+</section>
+
+<section id="library" class="screen workspace">
+  <div class="panel"><div class="panelHead">Departments</div><div class="panelBody">
+    <button class="tool" onclick="library('EEE')">EEE</button><button class="tool" onclick="library('ECE')">ECE</button><button class="tool" onclick="library('CSE')">CSE</button><button class="tool" onclick="library('CIVIL')">CIVIL</button><button class="tool" onclick="library('MECH')">MECH</button><button class="tool" onclick="library('AERO')">AERO</button><button class="tool" onclick="library('SPACE')">SPACE</button><button class="tool" onclick="library('BIO')">BIO</button><button class="tool" onclick="library('CHEM')">CHEM</button><button class="tool" onclick="library('QUANTUM')">QUANTUM</button>
+  </div></div>
+  <div class="panel"><div class="panelHead">Universal Component Library</div><div class="panelBody" id="libraryContent">
+    <div class="cards">
+      <div class="card"><h3>Electronics</h3><p>Resistors, capacitors, diodes, transistors, ICs, sensors, controllers, power modules.</p></div>
+      <div class="card"><h3>Computing</h3><p>Processors, memory, buses, networking, algorithms, software modules.</p></div>
+      <div class="card"><h3>Mechanical</h3><p>Motors, gears, shafts, bearings, engines, mechanisms and assemblies.</p></div>
+      <div class="card"><h3>Civil</h3><p>Pipelines, structures, foundations, materials, fluid systems and tools.</p></div>
+    </div>
+  </div></div>
+  <div class="panel"><div class="panelHead">Import</div><div class="panelBody"><div class="item"><b>Import Component</b>Add an item to the active design.</div><button class="tool" onclick="addNode('Imported Component')">＋ IMPORT</button></div></div>
+</section>
+
+<section id="gesture" class="screen workspaceWide">
+  <div class="panel"><div class="panelHead">Gesture Control Guide</div><div class="panelBody">
+    <div class="cards">
+      <div class="card"><h3>☝ One Finger</h3><p>Select / remove one active element depending on current gesture mode.</p></div>
+      <div class="card"><h3>✌ Two Fingers</h3><p>Move to the next element or navigate selection order.</p></div>
+      <div class="card"><h3>✋ Five Fingers</h3><p>Open-hand command state for global interaction.</p></div>
+      <div class="card"><h3>← Swipe</h3><p>Undo / navigation gesture.</p></div>
+      <div class="card"><h3>→ Swipe</h3><p>Redo / forward navigation gesture.</p></div>
+      <div class="card"><h3>↻ Rotate</h3><p>Rotate the selected visual component.</p></div>
+      <div class="card"><h3>⇱ Split</h3><p>Separate prototype elements for inspection.</p></div>
+      <div class="card"><h3>◎ Assemble</h3><p>Recombine separated elements.</p></div>
+    </div>
+  </div></div>
+</section>
+
+</main>
+
+<footer class="bottom">
+  <input id="prompt" class="prompt" placeholder='Speak or type: “Hey David, create a NAND circuit with a resistor and capacitor”'>
+  <button class="send" onclick="handleCommand()">SEND ↗</button>
+</footer>
+</div>
+
+<script>
+const state={nodes:[],connections:[],activity:0,listening:false};
+const navs=document.querySelectorAll('.nav');
+navs.forEach(n=>n.addEventListener('click',()=>showScreen(n.dataset.screen)));
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  navs.forEach(n=>n.classList.toggle('active',n.dataset.screen===id));
+  log('NAV','Opened '+id.toUpperCase());
+}
+function log(type,msg){
+  state.activity++;
+  document.getElementById('activityCount').textContent=String(state.activity).padStart(2,'0');
+  const box=document.getElementById('homeLog');
+  const el=document.createElement('div');el.className='logline';el.innerHTML='<b>'+type+'</b>'+msg;
+  box.prepend(el);while(box.children.length>7)box.lastChild.remove();
+}
+function addNode(name){
+  const id='N'+(state.nodes.length+1);
+  state.nodes.push({id,name});
+  renderDesign();
+  document.getElementById('componentCount').textContent=String(state.nodes.length).padStart(2,'0');
+  log('DESIGN',name+' imported into model');
+  showScreen('design');
+}
+function renderDesign(){
+  const c=document.getElementById('designCanvas');c.innerHTML='';
+  state.nodes.forEach((n,i)=>{
+    const el=document.createElement('div');el.className='node';el.style.left=(8+(i%3)*30)+'%';el.style.top=(18+Math.floor(i/3)*30)+'%';el.textContent=n.name;
+    const sm=document.createElement('small');sm.textContent=n.id+' · editable';el.appendChild(sm);
+    el.onclick=()=>{document.getElementById('selected').textContent=n.name+' ('+n.id+')';log('SELECT',n.name+' selected')};
+    c.appendChild(el);
+  });
+}
+function splitModel(){log('VISUAL','Selected prototype elements separated');}
+function rotateModel(){log('VISUAL','Selected component rotated 90°');}
+function checkModel(){document.getElementById('simCheck').textContent='PASS';document.getElementById('modelState').textContent='Logical structure checked';log('CHECK','Logical model check completed — physical hardware not verified');showScreen('simulation')}
+function runSimulation(){document.getElementById('simRun').textContent='RUNNING';log('SIM','Design transferred to simulation');setTimeout(()=>{document.getElementById('simRun').textContent='COMPLETE';log('SIM','Simulation cycle completed')},1200);showScreen('simulation')}
+function stopSimulation(){document.getElementById('simRun').textContent='STOPPED';log('SIM','Simulation stopped')}
+function resetSimulation(){document.getElementById('simRun').textContent='IDLE';document.getElementById('simCheck').textContent='READY';log('SIM','Simulation reset')}
+function newProject(){state.nodes=[];renderDesign();document.getElementById('componentCount').textContent='00';log('FILE','Blank model created')}
+function saveProject(){localStorage.setItem('DAVID_AI_MODEL',JSON.stringify(state));log('FILE','Model saved in browser storage')}
+function loadProject(){const x=localStorage.getItem('DAVID_AI_MODEL');if(x){Object.assign(state,JSON.parse(x));renderDesign();document.getElementById('componentCount').textContent=String(state.nodes.length).padStart(2,'0');log('FILE','Previous model loaded')}else log('FILE','No saved model found')}
+function exportProject(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DAVID_AI_model.json';a.click();URL.revokeObjectURL(a.href);log('FILE','Model exported')}
+function library(dept){document.getElementById('libraryContent').innerHTML='<div class="cards"><div class="card"><h3>'+dept+' Library</h3><div class="bigNumber">＋</div><p>Component collection ready for import.</p></div><div class="card"><h3>Import</h3><p>Use voice or the command bar to request a component.</p></div><div class="card"><h3>Visual</h3><p>Imported components can be positioned and connected.</p></div><div class="card"><h3>Simulation</h3><p>Validated logical models can be transferred to simulation.</p></div></div>';log('LIB','Opened '+dept+' component library')}
+function handleCommand(){
+  const p=document.getElementById('prompt');const text=p.value.trim();if(!text)return;
+  log('USER',text);p.value='';
+  const t=text.toLowerCase();
+  if(t.includes('simulation')||t.includes('ready to run')||t.includes('run model')){runSimulation();return}
+  if(t.includes('split')){splitModel();return}
+  if(t.includes('rotate')){rotateModel();return}
+  if(t.includes('check')||t.includes('validate')){checkModel();return}
+  if(t.includes('code')||t.includes('python')){showScreen('code');log('AI','Code workspace opened');return}
+  if(t.includes('library')||t.includes('component')){showScreen('library');log('AI','Universal component library opened');return}
+  if(t.includes('design')||t.includes('circuit')||t.includes('prototype')||t.includes('create')){
+    if(t.includes('nand'))addNode('NAND Gate');
+    if(t.includes('resistor'))addNode('Resistor');
+    if(t.includes('capacitor'))addNode('Capacitor');
+    showScreen('design');log('AI','Design instruction interpreted');
+    return;
+  }
+  log('AI','Instruction received — connect the real AI backend for natural-language generation.');
+}
+const mic=document.getElementById('mic');
+let recognition=null;
+mic.onclick=()=>{
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){alert('Speech recognition is not supported in this browser. Use Chrome or Edge.');return}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(state.listening){recognition&&recognition.stop();return}
+  recognition=new SR();recognition.lang='en-US';recognition.continuous=false;recognition.interimResults=false;
+  recognition.onstart=()=>{state.listening=true;mic.classList.add('listening');document.getElementById('status').textContent='LISTENING · SAY “HEY DAVID”';};
+  recognition.onresult=e=>{const text=e.results[0][0].transcript;document.getElementById('prompt').value=text;log('VOICE',text);handleCommand()};
+  recognition.onerror=e=>log('VOICE','Recognition: '+e.error);
+  recognition.onend=()=>{state.listening=false;mic.classList.remove('listening');document.getElementById('status').textContent='SYSTEM ONLINE · READY'};
+  recognition.start();
+};
+document.getElementById('prompt').addEventListener('keydown',e=>{if(e.key==='Enter')handleCommand()});
+function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB')}
+setInterval(updateClock,1000);updateClock();
+log('SYSTEM','Command center initialized');
+</script>
+</body>
+</html>'''
+
+path = Path("/mnt/data/DAVID_AI_Futuristic_FullScreen.html")
+path.write_text(html, encoding="utf-8")
+print(path)
