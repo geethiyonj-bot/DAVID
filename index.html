@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DAVID Universal Innovation Prototype Studio</title>
+<style>
+:root{
+ --bg:#08111f;--panel:#0e1a2b;--panel2:#122238;--line:#263b57;
+ --text:#edf5ff;--muted:#8ea5bf;--accent:#57a6ff;--accent2:#8d6bff;
+ --good:#39d98a;--warn:#ffca57;--bad:#ff647c;--shadow:0 16px 45px #0008;
+}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 50% -20%,#18365a 0,#08111f 45%);color:var(--text);font:14px system-ui,Segoe UI,Arial,sans-serif;height:100vh;overflow:hidden}
+button,input,select,textarea{font:inherit} button{cursor:pointer;color:var(--text);background:#162941;border:1px solid var(--line);border-radius:9px;padding:9px 12px}button:hover{border-color:#518cc7;background:#1a3555}
+button.primary{background:linear-gradient(135deg,#287bd4,#6750c9);border:0} button.danger{border-color:#7d3343}
+.app{display:grid;grid-template-columns:230px 1fr;height:100vh}
+.sidebar{background:#091522;border-right:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:12px}
+.brand{display:flex;gap:10px;align-items:center;font-weight:800;font-size:19px}.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#57a6ff,#8d6bff);display:grid;place-items:center;font-weight:900}
+.small{color:var(--muted);font-size:12px}.nav{display:flex;flex-direction:column;gap:6px;margin-top:8px}.nav button{display:flex;justify-content:flex-start;gap:10px;background:transparent;border-color:transparent;text-align:left}.nav button.active{background:#142b46;border-color:#294d72}
+.sidebox{margin-top:auto;border:1px solid var(--line);background:#0c1a2a;border-radius:12px;padding:12px}.status{display:flex;gap:8px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:var(--good)}
+.main{min-width:0;display:flex;flex-direction:column}.top{height:64px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#0a1625cc;backdrop-filter:blur(10px)}.top h1{font-size:18px;margin:0}.actions{display:flex;gap:8px}.workspace{flex:1;overflow:auto;padding:18px 18px 110px}
+.page{display:none}.page.active{display:block}.grid{display:grid;gap:14px}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:linear-gradient(180deg,#102037,#0d1929);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:0 8px 25px #0003}.card h2,.card h3{margin:0 0 10px}.card p{color:var(--muted);line-height:1.5}.hero{padding:25px;background:linear-gradient(120deg,#102a49,#171d40);border:1px solid #31547b;border-radius:17px;margin-bottom:14px}.hero h2{font-size:28px;margin:0 0 8px}.hero p{max-width:900px}
+.toolbar{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}.toolbar button.active{outline:2px solid var(--accent);background:#193d62}
+input,select,textarea{width:100%;background:#091624;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px;outline:none}textarea{min-height:230px;resize:vertical}
+label{color:var(--muted);font-size:12px;display:block;margin-bottom:5px}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1}
+.filecards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.filecard{min-height:115px;display:flex;flex-direction:column;justify-content:space-between}
+.pages{display:flex;gap:7px;flex-wrap:wrap}.pagechip{padding:8px 12px;border:1px solid var(--line);border-radius:20px;background:#0b1727}.pagechip.active{background:#1c4771}
+.design{display:grid;grid-template-columns:210px 1fr 250px;gap:12px;min-height:550px}.palette,.properties{background:#0c1828;border:1px solid var(--line);border-radius:13px;padding:12px}.palette-item{padding:10px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px;cursor:pointer}.palette-item:hover{background:#142d49}
+.canvas{position:relative;overflow:hidden;border:1px solid #314a69;border-radius:13px;min-height:550px;background-color:#0a1421;background-image:linear-gradient(#ffffff08 1px,transparent 1px),linear-gradient(90deg,#ffffff08 1px,transparent 1px);background-size:25px 25px}
+.node{position:absolute;min-width:110px;padding:11px 14px;border-radius:12px;background:linear-gradient(135deg,#193c61,#272354);border:1px solid #5795cc;box-shadow:0 8px 22px #0007;user-select:none;touch-action:none}.node.selected{outline:2px solid var(--warn)}.node small{display:block;color:#b8cbe0;margin-top:3px}.port{width:9px;height:9px;border-radius:50%;background:var(--good);position:absolute;right:-5px;top:50%;transform:translateY(-50%)}.port.in{left:-5px;right:auto;background:var(--accent)}
+svg.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.wire{stroke:#55d6ff;stroke-width:3;fill:none;stroke-linecap:round}.wire.signal{stroke:#ffca57}.wire.ground{stroke:#8c9aae}.wire.fluid{stroke:#56d6a0}.wire.mechanical{stroke:#ff8e57}.wire.data{stroke:#bd86ff}.wire.thermal{stroke:#ff6078}
+.visual{display:grid;grid-template-columns:185px 1fr 275px;gap:12px}.vtools,.props,.checkpanel{background:#0c1828;border:1px solid var(--line);border-radius:13px;padding:12px}.vtools button{width:100%;margin-bottom:7px;text-align:left}.visualcanvas{height:610px}.checkpanel{margin-top:12px}.checkline{padding:8px 0;border-bottom:1px solid #ffffff0d}.ok{color:var(--good)}.warning{color:var(--warn)}.error{color:var(--bad)}
+.library-layout{display:grid;grid-template-columns:230px 1fr;gap:12px}.departments{max-height:650px;overflow:auto}.dept{padding:10px;border-bottom:1px solid #ffffff0c;cursor:pointer}.dept.active{background:#163452}.library-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.libitem{min-height:90px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#0d1d30;display:flex;flex-direction:column;justify-content:space-between}.tag{display:inline-block;font-size:11px;color:#b9cce0;background:#19304a;padding:3px 7px;border-radius:20px}
+.cadcanvas{height:560px;position:relative}.cadcanvas #drawingCanvas{position:absolute;inset:0;width:100%;height:100%;z-index:5;pointer-events:none;touch-action:none}.cadcanvas.drawing-on #drawingCanvas{pointer-events:auto;cursor:crosshair}.cadcanvas.drawing-on #cadSvg{opacity:.45}.simlog{height:260px;overflow:auto;background:#06101a;border:1px solid var(--line);border-radius:10px;padding:12px;font-family:ui-monospace,monospace}.progress{height:10px;background:#07111d;border-radius:10px;overflow:hidden}.bar{height:100%;width:0;background:linear-gradient(90deg,#39d98a,#57a6ff,#8d6bff)}
+.taskbar{position:fixed;bottom:17px;left:calc(50% + 115px);transform:translateX(-50%);width:min(760px,calc(100vw - 270px));background:#0a1727ed;border:1px solid #375474;border-radius:28px;padding:7px;display:flex;gap:7px;align-items:center;box-shadow:var(--shadow);backdrop-filter:blur(16px);z-index:50}.davidmark{padding:0 8px;font-weight:800;color:#8fc7ff}.taskbar input{border:0;background:transparent}.taskbar select{width:95px;border-radius:20px}.mic{width:44px;height:44px;border-radius:50%;padding:0}.toast{position:fixed;right:20px;bottom:90px;background:#142b44;border:1px solid #3a638c;padding:12px 15px;border-radius:10px;opacity:0;transform:translateY(10px);transition:.25s;z-index:100}.toast.show{opacity:1;transform:none}
+.ai-running{animation:aiPulse 1s infinite alternate;border-color:#57a6ff}.ai-success{border-color:#39d98a}.ai-error{border-color:#ff647c}@keyframes aiPulse{to{box-shadow:0 0 24px #57a6ff55}}.guide{background:#0b1929;border:1px dashed #3d638a;padding:13px;border-radius:12px;margin-bottom:12px}.kbd{padding:2px 6px;border:1px solid var(--line);border-radius:5px;background:#08121e;color:#b8cce0}
+@media(max-width:1050px){.app{grid-template-columns:75px 1fr}.sidebar{padding:10px}.brand span,.nav button span,.sidebox{display:none}.nav button{justify-content:center}.taskbar{left:50%;width:min(760px,92vw)}.visual,.design{grid-template-columns:1fr}.vtools,.palette,.properties{display:flex;gap:6px;overflow:auto}.vtools button,.palette-item{white-space:nowrap;margin:0}.library-layout{grid-template-columns:1fr}.library-grid,.filecards,.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){.g2,.g3,.library-grid,.filecards{grid-template-columns:1fr}.taskbar{bottom:8px}.taskbar select{display:none}.workspace{padding:10px 10px 90px}}
+
+/* ===== DAVID VOICE + GESTURE CONTROL ===== */
+.voice-orb-wrap{position:fixed;inset:0;display:none;place-items:center;background:#02081299;backdrop-filter:blur(8px);z-index:200}
+.voice-orb-wrap.show{display:grid}
+.voice-orb{width:230px;height:230px;border-radius:50%;display:grid;place-items:center;
+ background:radial-gradient(circle at 35% 30%,#7ec8ff,#276bd1 42%,#25165f 75%,#08111f);
+ border:5px solid #76c9ff;box-shadow:0 0 35px #43bfff99,0 0 100px #6155ff66;position:relative}
+.voice-orb:before,.voice-orb:after{content:"";position:absolute;inset:-22px;border:2px solid #57a6ff66;border-radius:50%;animation:orbPulse 1.4s infinite}
+.voice-orb:after{inset:-45px;animation-delay:.45s}
+.voice-orb.listening{animation:orbGlow 1s infinite alternate}
+.voice-icon{font-size:82px;filter:drop-shadow(0 5px 14px #0008)}
+.voice-state{position:absolute;top:calc(50% + 145px);text-align:center;font-weight:800;font-size:18px}
+.voice-sub{font-size:12px;color:#b8d7f4;margin-top:6px;font-weight:500}
+@keyframes orbPulse{50%{transform:scale(1.06);opacity:.25}100%{transform:scale(1);opacity:.8}}
+@keyframes orbGlow{from{box-shadow:0 0 30px #43bfff88,0 0 80px #6155ff44}to{box-shadow:0 0 70px #43bfffdd,0 0 160px #6155ffaa}}
+.mic.big{width:64px;height:64px;border-radius:50%;font-size:27px;flex:0 0 64px;background:radial-gradient(circle at 35% 30%,#7ec8ff,#276bd1 45%,#25165f 82%);border:2px solid #76c9ff;box-shadow:0 0 22px #43bfff66}
+.mic.big.armed{box-shadow:0 0 28px #43bfffcc,0 0 70px #6155ff66}
+.mic.big.listening{background:radial-gradient(circle at 35% 30%,#fff,#e03b61 38%,#6d1731 80%);border-color:#ff8ca0;box-shadow:0 0 30px #ff647caa,0 0 75px #ff647c55;animation:micBeat .8s infinite alternate}
+.wake-status{min-width:125px;color:#9fc8ee;font-size:12px;text-align:center;white-space:nowrap}
+.wake-status.active{color:#7ff0b0;font-weight:800}
+.wake-status.command{color:#ffd36b}
+.mic.big.listening{background:#7c2034;border-color:#ff647c;box-shadow:0 0 22px #ff647c88;animation:micBeat .8s infinite alternate}
+@keyframes micBeat{to{transform:scale(1.08)}}
+.gesture-card{margin-top:12px;border:1px solid #31547b;background:#0b1929;border-radius:13px;padding:12px}
+.gesture-card video{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:#02070d;transform:scaleX(-1)}
+.gesture-state{margin-top:7px;padding:8px;border-radius:8px;background:#07121e;color:#9fd2ff}
+.gesture-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.gesture-grid button{font-size:12px}
+.learned{max-height:130px;overflow:auto}
+.command-chip{display:inline-block;padding:4px 7px;border-radius:14px;background:#19304a;margin:3px;font-size:11px}
+@media(max-width:650px){.voice-orb{width:180px;height:180px}.voice-icon{font-size:62px}.voice-state{top:calc(50% + 115px)}}
+
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">D</div><span>DAVID Studio</span></div>
+  <div class="small">Universal Innovation Prototype Studio</div>
+  <nav class="nav" id="nav"></nav>
+  <div class="sidebox"><div class="status"><i class="dot"></i><b>Prototype Mode</b></div><div class="small" style="margin-top:6px">AI workflow ready • local browser model</div></div>
+</aside>
+
+<main class="main">
+<header class="top"><h1 id="title">File</h1><div class="actions"><button onclick="newModel()">＋ New</button><button onclick="saveModel()">Save</button><button onclick="openFile()">Load</button></div></header>
+<section class="workspace">
+
+<!-- FILE -->
+<section id="file" class="page active">
+ <div class="hero"><h2>Build your innovation with DAVID</h2><p>Start with a blank model, load a previous model, or describe your idea in the DAVID task bar. Your model can contain multiple pages and components from every supported engineering and science domain.</p></div>
+ <div class="filecards">
+  <div class="card filecard"><h3>📄 New Model</h3><span class="small">Create a blank multi-page model.</span><button class="primary" onclick="newModel()">Create</button></div>
+  <div class="card filecard"><h3>📂 Load Model</h3><span class="small">Open a .davidmodel file.</span><button onclick="openFile()">Choose file</button></div>
+  <div class="card filecard"><h3>💾 Save Model</h3><span class="small">Save model pages, nodes and connections.</span><button onclick="saveModel()">Save .davidmodel</button></div>
+  <div class="card filecard"><h3>🌐 Export HTML</h3><span class="small">Export this complete application.</span><button onclick="exportHTML()">Export</button></div>
+ </div>
+ <div class="grid g2" style="margin-top:14px">
+  <div class="card"><h3>Model</h3><div class="row"><div><label>Model name</label><input id="modelName" value="My Innovation Model"></div><div><label>Version</label><input id="modelVersion" value="1.0"></div></div></div>
+  <div class="card"><h3>Workflow</h3><p>File → Design → Say “David” → Build / Import → Auto-connect → Check → Ready to run → Simulation → Visual / Split / Colour → Save / Export</p></div>
+ </div>
+</section>
+
+<!-- DESIGN -->
+<section id="design" class="page">
+ <div class="hero"><h2>Design</h2><p>Create the prototype model. Add components from the universal library, arrange them on pages, and let DAVID interpret your English voice commands. Say <b>“David”</b> and then describe the next design action.</p><div class="guide"><b>Example:</b> “David, create a PCB circuit with a NAND gate.” Then: “David, import a resistor and capacitor.” If exact pins are not supplied, DAVID creates a prototype-level default pin map and marks it for checking. Finally say: “David, it is ready to run.”</div></div>
+ <div class="pages" id="pageTabs"></div>
+ <div class="toolbar" style="margin-top:10px"><button onclick="addPage()">＋ Page</button><button onclick="renamePage()">Rename Page</button><button onclick="addLibraryToDesign()">Import Component</button><button onclick="clearDesign()">Clear Page</button></div>
+ <div class="design">
+  <div class="palette"><h3>Quick Components</h3><div id="quickPalette"></div></div>
+  <div class="canvas" id="designCanvas"></div>
+  <div class="properties" id="designProps"><h3>Properties</h3><p>Select a component.</p></div>
+ </div>
+</section>
+
+<!-- VISUAL -->
+<section id="visual" class="page">
+ <div class="hero"><h2>Visual Engine</h2><p>Separate, occupy, move, rotate, inspect, connect and test individual components or complete subsystems. Connection lines represent the relationships required for a runnable prototype. Voice commands and hand gestures can operate the same model. Say “David” to wake voice control; then speak naturally in English.</p><div id="learnedCommands" class="learned" style="margin-top:10px"></div></div>
+ <div class="guide">
+  <b>How to use:</b> <span class="kbd">Select</span> a component → <span class="kbd">Move</span> / <span class="kbd">Rotate</span> → <span class="kbd">Split</span> to separate it → choose <span class="kbd">Connect</span> and click two components → <span class="kbd">Check</span> → <span class="kbd">Run</span>.
+  Gesture concept: 1 finger = split one, 2 fingers = next split, 5 fingers = split all, closed hand = reassemble all. Mouse/touch buttons below implement the same workflow in this prototype.
+ </div>
+ <div class="toolbar">
+  <button class="primary" onclick="openFile('visual')">📂 Import Model / File</button>
+  <button onclick="addLibraryToVisual()">＋ Import Component</button><button class="primary" onclick="aiAnalyzeSplit()">🤖 AI Analyze & Split</button><button onclick="aiSplitSelected()">✂ AI Split Selected</button>
+  <select id="connectionType" style="max-width:180px"><option>Electrical</option><option>Signal</option><option>Ground</option><option>Data</option><option>Fluid</option><option>Mechanical</option><option>Communication</option><option>Thermal</option><option>Chemical</option><option>Generic</option></select>
+ </div>
+ <div class="visual">
+  <div class="vtools">
+   <h3>Tools</h3>
+   <button class="tool active" data-tool="select">↖ Select</button>
+   <button class="tool" data-tool="split">✂ Split</button>
+   <button class="tool" data-tool="connect">🔗 Connect</button>
+   <button class="tool" data-tool="move">✥ Move</button>
+   <button class="tool" data-tool="rotate">⟳ Rotate</button>
+   <button class="tool" data-tool="inspect">🔍 Inspect</button>
+   <button class="tool" data-tool="delete">⌫ Delete</button>
+   <button class="tool" data-tool="group">▣ Assemble / Group</button>
+   <button onclick="splitAll()">Split All</button><button onclick="assembleAll()">Reassemble All</button>
+  </div>
+  <div>
+   <div class="canvas visualcanvas" id="visualCanvas"><svg class="wires" id="wireSvg"></svg></div>
+   <div class="checkpanel"><div class="row"><b>Model Check</b><span id="checkSummary" class="small">Not checked</span><button onclick="checkModel()">✓ Check Connections</button><button class="primary" onclick="runModel()">▶ Run</button><button onclick="runSelected()">Run Selected</button></div><div id="checkList"></div></div><div class="gesture-card">
+<b>✋ Hand / Gesture Control</b>
+<div class="small" style="margin-top:5px">Camera gestures control the same model tools as voice: 1 finger = split/select, 2 fingers = next split, 5 fingers = split all, fist = reassemble, swipe left = undo, swipe right = redo.</div>
+<div class="gesture-grid"><button onclick="startHandControl()">📷 Start Hand Control</button><button onclick="stopHandControl()">■ Stop Camera</button></div>
+<video id="handVideo" autoplay muted playsinline></video>
+<div id="gestureState" class="gesture-state">Camera off • mouse/touch controls remain available</div>
+</div>
+  </div>
+  <div class="props" id="visualProps"><h3>Selected Component</h3><p class="small">Select a component to inspect its properties and connections.</p></div>
+ </div>
+</section>
+
+<!-- CODE -->
+<section id="code" class="page">
+ <div class="hero">
+  <h2>AI Code → Run → Model</h2>
+  <p>Describe what you want to build. DAVID creates implementation code, shows the code, runs supported Python in the browser, and converts the result into a Visual Engine model.</p>
+  <div class="guide"><b>Example:</b> “Create Python code for a car engine model. Include engine, fuel system, battery, starter motor, cooling system and exhaust, connect the parts and create the model.”</div>
+ </div>
+ <div class="card" style="margin-bottom:14px">
+  <label>What should DAVID create?</label>
+  <textarea id="aiCodePrompt" style="min-height:105px" placeholder="Example: Create a Python model for a car engine with engine block, battery, starter motor, fuel system, cooling system and exhaust. Connect the components and create the model."></textarea>
+  <div class="toolbar" style="margin-top:10px">
+   <select id="language" style="max-width:180px"><option>Python</option><option>JavaScript</option><option>Java</option><option>C</option><option>C++</option><option>Arduino</option><option>SQL</option><option>Verilog</option><option>VHDL</option><option>HTML/CSS</option></select>
+   <button class="primary" onclick="aiCreateFromPrompt($('aiCodePrompt').value)">✨ Create with DAVID</button>
+   <button onclick="generateCode()">Generate from Current Model</button>
+   <button onclick="runGeneratedPython()">▶ Run Python</button>
+   <button onclick="createModelFromGeneratedCode()">⚙ Create / Update Model</button>
+   <button onclick="copyCode()">Copy</button>
+   <button onclick="downloadText($('codeEditor').value,'david-generated-code.py')">Download Code</button>
+  </div>
+  <div id="aiPlan" class="guide" style="margin-top:10px">DAVID is waiting for a prompt.</div>
+ </div>
+ <div class="grid g2">
+  <div class="card"><h3>Generated Code</h3>
+   <textarea id="codeEditor" style="min-height:430px"># DAVID generated Python code will appear here.
+# Enter a prototype request above and click “Create with DAVID”.</textarea>
+  </div>
+  <div class="card"><h3>Execution / Model Result</h3>
+   <div id="pythonStatus" class="guide">Python runtime is ready when requested.</div>
+   <pre id="pythonOutput" class="simlog" style="height:390px;white-space:pre-wrap">No code has been executed yet.</pre>
+  </div>
+ </div>
+</section>
+
+<!-- CAD -->
+<section id="cad" class="page">
+ <div class="hero"><h2>CAD Engine</h2><p>Draw clean prototype geometry from rough ideas or prompts. Add primitives, components, dimensions and annotations.</p></div>
+ <div class="toolbar"><button onclick="cadAdd('rect')">Rectangle</button><button onclick="cadAdd('circle')">Circle</button><button onclick="cadAdd('line')">Line</button><button onclick="cadAdd('beam')">Beam</button><button onclick="cadAdd('column')">Column</button><button onclick="cadClear()">Clear</button><button class="primary" onclick="cadAI()">AI Refine Drawing</button></div>
+ <div class="toolbar" style="margin-top:10px"><button class="primary" id="drawToggle" onclick="toggleDrawing()">✏️ Enable Drawing</button><button onclick="setDrawMode('pen')">Pen</button><button onclick="setDrawMode('eraser')">Eraser</button><button onclick="clearDrawing()">Clear Drawing</button><button onclick="downloadDrawing()">Save Drawing</button><span id="drawStatus" class="small">Drawing OFF</span></div>
+ <div class="canvas cadcanvas" id="cadCanvas"><svg id="cadSvg" width="100%" height="100%"></svg><canvas id="drawingCanvas"></canvas></div>
+</section>
+
+<!-- SIM -->
+<section id="simulation" class="page">
+ <div class="hero"><h2>Simulation & Test</h2><p>DAVID checks component presence, connections and basic model consistency before a simulation run. A real physics/circuit solver can later be attached to this interface.</p></div>
+ <div class="grid g3">
+  <div class="card"><h3>1. Components</h3><div id="simComponents">Ready</div></div>
+  <div class="card"><h3>2. Connections</h3><div id="simConnections">Ready</div></div>
+  <div class="card"><h3>3. Run</h3><button class="primary" onclick="runSimulation()">Start Test</button></div>
+ </div>
+ <div class="card" style="margin-top:14px"><h3>Simulation Progress</h3><div class="progress"><div class="bar" id="simBar"></div></div><div class="simlog" id="simLog" style="margin-top:12px">Waiting for simulation...</div></div>
+</section>
+
+<!-- LIBRARY -->
+<section id="library" class="page">
+ <div class="hero"><h2>Universal Library</h2><p>Import components and tools across CSE, EEE, ECE, Mechanical, Civil, Chemical, FT, EXF, Pipeline, Aerospace, Biomedical, Agriculture, Marine, Physics, Chemistry, Mathematics and more.</p></div>
+ <div class="library-layout">
+  <div class="card departments"><input id="deptSearch" placeholder="Search department..." oninput="renderDepartments()"><div id="departments"></div></div>
+  <div><div class="toolbar"><input id="libSearch" placeholder="Search components/tools..." oninput="renderLibrary()"><span id="libCount" class="small"></span></div><div class="library-grid" id="libraryGrid"></div></div>
+ </div>
+</section>
+</section>
+</main>
+</div>
+
+<div class="taskbar">
+ <div class="davidmark">DAVID</div>
+ <input id="prompt" placeholder="Type to DAVID, or say “David” and speak in English..." onkeydown="if(event.key==='Enter')handlePrompt()">
+ <button class="mic big" id="micBtn" title="DAVID voice: click once to allow the microphone, then say “David”" onclick="toggleMic()">🎙️</button>
+ <div id="wakeStatus" class="wake-status">Say <b>“David”</b></div>
+ <button class="primary" onclick="handlePrompt()">➤</button>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".davidmodel,.json,.html" hidden>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+<script>
+/* ============================================================
+   DAVID UNIVERSAL INNOVATION PROTOTYPE STUDIO
+   Single-file browser prototype.
+   ============================================================ */
+
+const LIBRARY = {
+"CSE":{"Programming":["Python","Java","C","C++","C#","JavaScript","TypeScript","R","Go"],
+"Hardware":["CPU","GPU","RAM","ROM","Motherboard","SSD","HDD","Microprocessor"],
+"Networking":["Router","Switch","Server","Firewall","Network Node","Cloud","API Gateway"],
+"Database":["SQL Database","Table","Query","API","NoSQL Database","Data Warehouse"],
+"AI & Data Science":["AI Model","Neural Network","Dataset","Training Block","Inference Block","Computer Vision","NLP Model"]},
+"IT":{"Infrastructure":["Server","Cloud","Router","Switch","Storage","Backup"],"Web":["Website","Web App","API","Authentication","Frontend","Backend"],"Security":["Firewall","Identity","Access Control","Encryption"]},
+"AI/Data Science":{"AI":["AI Model","Neural Network","Dataset","Training","Inference","Agent"],"Analytics":["Data Table","Chart","Statistics","Regression","Classification"]},
+"EEE":{"Electrical":["Battery","AC Source","DC Source","Transformer","Generator","Motor","Relay","Switch","Fuse","Circuit Breaker"],
+"Power Electronics":["Diode","MOSFET","IGBT","SCR","Rectifier","Inverter","Converter"],
+"Renewable":["Solar Panel","Wind Turbine","Battery Bank","Charge Controller","Inverter"],
+"Machines":["DC Motor","Induction Motor","Synchronous Motor","Alternator"]},
+"ECE":{"Electronic Components":["Resistor","Capacitor","Inductor","Diode","LED","Transistor","BC547","1N5819","LM358","Op-Amp"],
+"Communication":["Microphone","Speaker","Antenna","RF Module","Bluetooth Module","WiFi Module","Oscillator","ADC","DAC"],
+"Embedded":["Arduino","ESP32","Raspberry Pi","STM32","Microcontroller","FPGA"]},
+"Instrumentation":{"Sensors":["Temperature Sensor","Pressure Sensor","Flow Sensor","Level Sensor","Humidity Sensor","Proximity Sensor","Light Sensor"],
+"Measurement":["Voltmeter","Ammeter","Oscilloscope","Flow Meter","Pressure Gauge"],
+"Control":["PID Controller","PLC","Control Valve","Actuator","Servo"]},
+"Mechanical":{"Machines":["Motor","Pump","Compressor","Turbine","Generator","CNC Machine","Lathe"],
+"Mechanical Parts":["Gear","Shaft","Bearing","Pulley","Chain","Belt","Spring","Coupling"],
+"Robotics":["Robot Arm","Servo Motor","Gripper","Linear Actuator","Robot Joint"]},
+"Mechatronics":{"Actuators":["Servo","Stepper Motor","Linear Actuator","Pneumatic Cylinder","Hydraulic Cylinder"],"Control":["PLC","Microcontroller","PID Controller","HMI"]},
+"Robotics":{"Robot":["Robot Arm","Mobile Robot","AGV","Drone","Gripper"],"Sensors":["Lidar","Camera","IMU","Ultrasonic Sensor","Force Sensor"]},
+"Chemical":{"Process":["Reactor","Tank","Mixer","Heat Exchanger","Filter","Separator","Distillation Column"],
+"Fluid":["Pump","Valve","Pipe","Pipeline","Compressor","Flow Meter"]},
+"Pipeline":{"Pipeline Components":["Pipeline","Pipe","Pipe Junction","Valve","Check Valve","Control Valve","Flange","Pump","Compressor"],
+"Instrumentation":["Pressure Sensor","Flow Meter","Temperature Sensor","Level Sensor"],
+"Process":["Storage Tank","Separator","Heat Exchanger","Filter","Reactor","Pig Launcher","Pig Receiver"]},
+"Oil & Gas":{"Upstream":["Well","Drilling Rig","Separator","Pump","Compressor"],"Midstream":["Pipeline","Valve","Metering Station","Storage Tank"],"Downstream":["Refinery","Distillation Column","Heat Exchanger","Storage Tank"]},
+"FT":{"Food Processing":["Food Mixer","Blender","Food Processing Tank","Pasteurizer","Homogenizer","Dryer","Oven","Refrigeration Unit"],
+"Packaging":["Filling Machine","Sealing Machine","Conveyor","Packaging Unit"],"Sensors":["Temperature Sensor","Pressure Sensor","Humidity Sensor","Weight Sensor"]},
+"EXF":{"Textile":["Spinning Machine","Weaving Machine","Knitting Machine","Dyeing Unit","Printing Machine","Textile Dryer","Conveyor"],
+"Fashion":["Fabric","Pattern","Garment","Cutting Machine","Sewing Machine"]},
+
+/* ========================== CIVIL ========================== */
+"Civil":{
+"Structural":["Beam","Column","Slab","Footing","Foundation","Truss","Portal Frame","Steel Frame","Concrete Frame","Retaining Wall","Shear Wall","Staircase","Bridge","Tower","Dam"],
+"Building / BIM":["Building","Floor","Wall","Door","Window","Roof","Staircase","Room","Column Grid","Building Site","BIM Model"],
+"Geotechnical":["Soil Layer","Soil Profile","Shallow Foundation","Pile Foundation","Pile Group","Retaining Wall","Sheet Pile","Excavation","Slope","Embankment","Groundwater Table","Borehole"],
+"Surveying":["Survey Point","Total Station","Theodolite","Auto Level","GNSS Receiver","GPS Point","Benchmark","Contour","Survey Line","Coordinate Point"],
+"Transportation":["Road","Highway","Lane","Road Junction","Roundabout","Pavement","Bridge","Railway","Rail Track","Airport Runway","Traffic Signal","Traffic Sensor","Bus Stop","Parking Area"],
+"Water / Hydraulics":["Water Tank","Reservoir","River","Canal","Dam","Weir","Pump","Pipe","Pipeline","Valve","Culvert","Flow Meter","Pressure Sensor","Water Distribution Network"],
+"Drainage":["Storm Drain","Drainage Channel","Sewer Pipe","Manhole","Catch Basin","Culvert","Drain Outlet","Sewer Network"],
+"Environmental":["Water Treatment Plant","Wastewater Treatment Plant","Sewage Treatment Plant","Air Quality Sensor","Water Quality Sensor","Pollution Sensor","Waste Tank","Treatment Tank","Filter"],
+"Construction":["Construction Site","Crane","Excavator","Bulldozer","Concrete Mixer","Concrete Pump","Scaffolding","Formwork","Rebar","Construction Worker","Safety Barrier"],
+"Construction Materials":["Concrete","Reinforced Concrete","Steel","Rebar","Brick","Block","Cement","Sand","Aggregate","Asphalt","Timber","Glass"],
+"Quantity Surveying":["BOQ","Quantity Calculator","Material Quantity","Cost Estimate","Rate Analysis","Measurement Sheet"],
+"Construction Management":["Project","Activity","Task","Milestone","Gantt Chart","CPM Network","Resource","Labour","Material Schedule"],
+"GIS":["Map","Site Boundary","Terrain","Coordinate System","GIS Layer","Road Layer","Building Layer","Drainage Layer","Land Use Layer"],
+"Analysis":["Point Load","UDL Load","Wind Load","Seismic Load","Dead Load","Live Load","Stress","Strain","Displacement","Reaction","Moment","Shear Force","Finite Element Mesh"]
+},
+"Architecture":{"Building":["Building","Floor Plan","Wall","Door","Window","Roof","Staircase","Room"],"Visualization":["3D Model","Material","Lighting","Landscape","Site"]},
+"Automobile":{"Vehicle":["Car","Truck","Bus","Motorcycle","EV"],"Powertrain":["Engine","Battery","Motor","Gearbox","Differential","Wheel"],"Systems":["Brake","Suspension","Steering","Fuel Tank"]},
+"Production/Manufacturing":{"Machines":["CNC Machine","Lathe","Milling Machine","3D Printer","Press","Conveyor"],"Process":["Assembly Line","Inspection Station","Robot Cell","Warehouse"]},
+"Biomedical":{"Devices":["ECG Sensor","Heart Monitor","Blood Pressure Sensor","Pulse Sensor","Medical Pump","Prosthetic Limb"],"Biology":["Cell","DNA","Protein","Tissue","Organ"]},
+"Biotechnology":{"Lab":["Bioreactor","Culture Tank","Centrifuge","Microscope","Incubator"],"Biology":["Cell","DNA","RNA","Protein","Enzyme"]},
+"Pharmaceutical":{"Process":["Reactor","Mixer","Tablet Press","Granulator","Dryer","Filling Machine"],"Quality":["HPLC","Spectrometer","Temperature Sensor","Pressure Sensor"]},
+"Physics":{"Mechanics":["Mass","Force","Spring","Pendulum","Projectile","Rigid Body"],"Electromagnetics":["Electric Field","Magnetic Field","Charge","Coil","Magnet"],"Waves":["Wave","Sound Wave","Light Wave","Oscillator"]},
+"Chemistry":{"Molecules":["Atom","Molecule","Chemical","Reaction","Catalyst","Solvent","Solution"],"Lab":["Beaker","Flask","Burette","Pipette","Burner","pH Meter"]},
+"Mathematics":{"Tools":["Equation","Matrix","Vector","Graph","Function","Integral","Derivative","Optimization","Statistics"]},
+"Environmental":{"Systems":["Water Treatment Plant","Air Quality Sensor","Wastewater Plant","Recycling Plant","Pollution Sensor"],"Monitoring":["Temperature Sensor","pH Sensor","Gas Sensor","Water Quality Sensor"]},
+"Agriculture":{"Systems":["Farm","Irrigation System","Water Pump","Soil Sensor","Moisture Sensor","Greenhouse","Sprinkler","Drip Irrigation"],"Machines":["Tractor","Harvester","Seeder","Drone"]},
+"Marine":{"Marine Systems":["Ship","Boat","Propeller","Marine Engine","Harbour","Offshore Platform","Submarine"],"Sensors":["Depth Sensor","Sonar","GPS","Marine Radar"]},
+"Aerospace/Space":{"Space":["Satellite","Rocket","Space Station","Spacecraft","Satellite Antenna","Solar Array","Telescope"],"Aircraft":["Aircraft","Wing","Engine","Propeller","Landing Gear"],"Ground":["Launch Pad","Ground Station","Tracking Station"]},
+"Energy/Renewable":{"Solar":["Solar Panel","Solar Battery","Solar Tracker"],"Wind":["Wind Turbine","Generator","Tower"],"Storage":["Battery Bank","Inverter","Charge Controller"]},
+"IoT/Embedded":{"Controllers":["Arduino","ESP32","STM32","Raspberry Pi","PLC"],"Connectivity":["WiFi","Bluetooth","LoRa","Zigbee","MQTT"],"Sensors":["Temperature","Pressure","Motion","Light","Gas"]},
+"Cybersecurity":{"Security":["Firewall","IDS","IPS","Authentication","Encryption","VPN","Security Monitor"]},
+"Control/Automation":{"Control":["PID Controller","PLC","SCADA","HMI","Control Valve","Actuator"],"Sensors":["Temperature","Pressure","Flow","Level","Position"]}
+};
+
+const state={
+ name:"My Innovation Model",version:"1.0",pages:[{name:"Page 1",nodes:[]}],page:0,
+ visualNodes:[],connections:[],selected:null,tool:"select",connectFrom:null,history:[],future:[],
+ libDept:"Civil",libCategory:null,micListening:false,micArmed:false,wakeActive:false,wakeTimer:null,recognition:null,
+voiceHistory:[],learnedTerms:[],lastGestureX:null,gestureBusy:false,handStream:null,handCamera:null
+};
+
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,9);
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2300)}
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function snapshot(){state.history.push(clone({pages:state.pages,visualNodes:state.visualNodes,connections:state.connections}));if(state.history.length>30)state.history.shift();state.future=[]}
+function restoreSnap(s){state.pages=s.pages;state.visualNodes=s.visualNodes;state.connections=s.connections;renderAll()}
+function undo(){if(!state.history.length)return;state.future.push(clone({pages:state.pages,visualNodes:state.visualNodes,connections:state.connections}));restoreSnap(state.history.pop())}
+function redo(){if(!state.future.length)return;state.history.push(clone({pages:state.pages,visualNodes:state.visualNodes,connections:state.connections}));restoreSnap(state.future.pop())}
+
+const navItems=[["file","📁","File"],["design","🎨","Design"],["visual","🔗","Visual Engine"],["code","</>","Code Engine"],["cad","📐","CAD Engine"],["simulation","🧪","Simulation"],["library","🧩","Universal Library"]];
+function initNav(){ $("nav").innerHTML=navItems.map(x=>`<button data-page="${x[0]}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join("");document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>showPage(b.dataset.page));}
+function showPage(id){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===id));$("title").textContent=navItems.find(x=>x[0]===id)?.[2]||id;if(id==="design")renderDesign();if(id==="visual")renderVisual();if(id==="library"){renderDepartments();renderLibrary()}if(id==="simulation")updateSimInfo()}
+initNav();showPage("file");
+
+function newModel(){snapshot();state.name="My Innovation Model";state.version="1.0";state.pages=[{name:"Page 1",nodes:[]}];state.page=0;state.visualNodes=[];state.connections=[];state.selected=null;$("modelName").value=state.name;$("modelVersion").value=state.version;renderAll();toast("New blank model created")}
+function saveModel(){state.name=$("modelName").value||"My Innovation Model";state.version=$("modelVersion").value||"1.0";const data={app:"DAVID Universal Innovation Prototype Studio",version:"1.0",savedAt:new Date().toISOString(),model:{name:state.name,version:state.version,pages:state.pages,visualNodes:state.visualNodes,connections:state.connections}};downloadText(JSON.stringify(data,null,2),state.name.replace(/[^a-z0-9]/gi,"_")+".davidmodel");toast("Model saved")}
+function openFile(target){$("fileInput").dataset.target=target||"file";$("fileInput").click()}
+$("fileInput").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);const m=d.model||d;if(m.pages){snapshot();state.name=m.name||"Loaded Model";state.version=m.version||"1.0";state.pages=m.pages;state.visualNodes=m.visualNodes||[];state.connections=m.connections||[];state.page=0;$("modelName").value=state.name;$("modelVersion").value=state.version;renderAll();showPage(state.pages.length?$("fileInput").dataset.target==="visual"?"visual":"design":"file");toast("Model loaded: "+f.name)}else toast("No DAVID model data found")}catch(err){toast("Could not read model file")}};r.readAsText(f)});
+function downloadText(text,name,mime="text/plain"){const blob=new Blob([text],{type:mime});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function exportHTML(){downloadText("<!DOCTYPE html>\\n"+document.documentElement.outerHTML,"DAVID_Universal_Innovation_Prototype_Studio.html","text/html");toast("HTML exported")}
+
+function renderPages(){ $("pageTabs").innerHTML=state.pages.map((p,i)=>`<button class="pagechip ${i===state.page?"active":""}" onclick="selectPage(${i})">${escapeHtml(p.name)}</button>`).join("")}
+function selectPage(i){state.page=i;renderDesign()}
+function addPage(){snapshot();state.pages.push({name:"Page "+(state.pages.length+1),nodes:[]});state.page=state.pages.length-1;renderDesign()}
+function renamePage(){const n=prompt("Page name",state.pages[state.page].name);if(n){snapshot();state.pages[state.page].name=n;renderDesign()}}
+function clearDesign(){snapshot();state.pages[state.page].nodes=[];renderDesign()}
+function quickComponents(){return ["Microphone","LM358","Resistor","Capacitor","LED","Battery","Beam","Column","Road","Pump","Tank","Pressure Sensor"].map(n=>`<div class="palette-item" onclick="addDesignNode('${esc(n)}')">${n}</div>`).join("")}
+function addDesignNode(name,x=100+Math.random()*450,y=80+Math.random()*350){snapshot();state.pages[state.page].nodes.push({id:uid(),name,x,y,rotation:0,split:false});renderDesign()}
+function renderDesign(){renderPages();$("quickPalette").innerHTML=quickComponents();const c=$("designCanvas");c.innerHTML="";state.pages[state.page].nodes.forEach(n=>{const el=nodeElement(n,true);c.appendChild(el)});renderDesignProps()}
+function nodeElement(n,design=false){const d=document.createElement("div");d.className="node";d.dataset.id=n.id;d.style.left=n.x+"px";d.style.top=n.y+"px";d.style.transform=`rotate(${n.rotation||0}deg)`;if(n.color){d.style.background=`linear-gradient(135deg,${n.color},#0d1929)`;d.style.borderColor=n.color;d.style.boxShadow=`0 0 18px ${n.color}66`;}d.innerHTML=`<b>${escapeHtml(n.name)}</b><small>${n.split?"Separated":"Component"}${n.pinInfo?" • "+escapeHtml(n.pinInfo):""}</small><i class="port in"></i><i class="port"></i>`;d.onpointerdown=e=>{if(e.target.classList.contains("port"))return;selectNode(n.id,design);dragNode(e,n,d,design)};d.onclick=e=>{e.stopPropagation();selectNode(n.id,design)};return d}
+function dragNode(e,n,el,design){if(design===false && state.tool!=="move" && state.tool!=="select")return;const sx=e.clientX,sy=e.clientY,ox=n.x,oy=n.y;const move=ev=>{n.x=ox+ev.clientX-sx;n.y=oy+ev.clientY-sy;el.style.left=n.x+"px";el.style.top=n.y+"px";if(!design)drawWires()};const up=()=>{document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",up);if(n.x!==ox||n.y!==oy){snapshot();/* positions already changed; snapshot preserves current */}};document.addEventListener("pointermove",move);document.addEventListener("pointerup",up)}
+function selectNode(id,design){if(design){renderDesignProps(id);return}if(state.tool==="connect"){if(!state.connectFrom){state.connectFrom=id;toast("Select the destination component")}else if(state.connectFrom!==id){snapshot();state.connections.push({id:uid(),from:state.connectFrom,to:id,type:$("connectionType").value});state.connectFrom=null;renderVisual();toast("Connection created")};return}if(state.tool==="delete"){snapshot();state.visualNodes=state.visualNodes.filter(n=>n.id!==id);state.connections=state.connections.filter(c=>c.from!==id&&c.to!==id);state.selected=null;renderVisual();return}if(state.tool==="split"){snapshot();const n=state.visualNodes.find(n=>n.id===id);if(n)n.split=true;renderVisual();return}if(state.tool==="rotate"){snapshot();const n=state.visualNodes.find(n=>n.id===id);if(n)n.rotation=(n.rotation||0)+15;renderVisual();return}state.selected=id;renderVisual()}
+function renderDesignProps(id){const n=(state.pages[state.page].nodes||[]).find(x=>x.id===id);$("designProps").innerHTML=n?`<h3>Properties</h3><label>Name</label><input value="${escapeAttr(n.name)}" onchange="editDesignName('${n.id}',this.value)"><label style="margin-top:10px">X</label><input value="${Math.round(n.x)}"><label style="margin-top:10px">Y</label><input value="${Math.round(n.y)}"><label style="margin-top:10px">Rotation</label><input value="${n.rotation||0}">`:`<h3>Properties</h3><p>Select a component.</p>`}
+function editDesignName(id,v){snapshot();const n=state.pages[state.page].nodes.find(n=>n.id===id);if(n)n.name=v;renderDesign()}
+function addLibraryToDesign(){showPage("library");toast("Choose Import on a library component")}
+function importToDesign(name){addDesignNode(name);showPage("design");toast(name+" imported into Design")}
+
+function syncVisualFromDesign(){if(!state.visualNodes.length){state.visualNodes=state.pages.flatMap(p=>p.nodes.map(n=>({...n})));if(!state.visualNodes.length){state.visualNodes=[{id:uid(),name:"Input",x:90,y:180,rotation:0},{id:uid(),name:"Controller",x:330,y:180,rotation:0},{id:uid(),name:"Output",x:570,y:180,rotation:0}]}}}
+function renderVisual(){syncVisualFromDesign();const lc=$("learnedCommands");if(lc)lc.innerHTML=state.voiceHistory.length?"Recent DAVID commands: "+state.voiceHistory.slice(0,8).map(x=>`<span class="command-chip">${escapeHtml(x.text)}</span>`).join(""):"Voice command history will appear here.";const c=$("visualCanvas");c.querySelectorAll(".node").forEach(x=>x.remove());state.visualNodes.forEach(n=>{const el=nodeElement(n,false);if(n.id===state.selected)el.classList.add("selected");c.appendChild(el)});drawWires();renderVisualProps();$("checkList").innerHTML="";$("checkSummary").textContent="Not checked"}
+function drawWires(){const c=$("visualCanvas"),svg=$("wireSvg");svg.innerHTML="";const rect=c.getBoundingClientRect();for(const w of state.connections){const a=state.visualNodes.find(n=>n.id===w.from),b=state.visualNodes.find(n=>n.id===w.to);if(!a||!b)continue;const x1=a.x+110,y1=a.y+28,x2=b.x,y2=b.y+28;const path=document.createElementNS("http://www.w3.org/2000/svg","path");path.setAttribute("d",`M ${x1} ${y1} C ${x1+80} ${y1}, ${x2-80} ${y2}, ${x2} ${y2}`);path.setAttribute("class","wire "+w.type.toLowerCase().replace(" ","-"));svg.appendChild(path)}}
+function renderVisualProps(){const n=state.visualNodes.find(n=>n.id===state.selected);if(!n){$("visualProps").innerHTML="<h3>Selected Component</h3><p class='small'>Select a component.</p>";return}const con=state.connections.filter(c=>c.from===n.id||c.to===n.id);$("visualProps").innerHTML=`<h3>${escapeHtml(n.name)}</h3><label>Position</label><p>X ${Math.round(n.x)} / Y ${Math.round(n.y)}</p><label>Rotation</label><p>${n.rotation||0}°</p><label>State</label><p>${n.split?"Separated":"Assembled"}</p><label>Connections (${con.length})</label>${con.map(c=>`<div class="checkline">${escapeHtml(c.type)} → ${escapeHtml(state.visualNodes.find(x=>x.id===(c.from===n.id?c.to:c.from))?.name||"?")}</div>`).join("")||"<p class='small'>No connections.</p>"}<button onclick="deleteSelected()">Delete</button>`}
+function deleteSelected(){if(state.selected){selectNode(state.selected,false)}}
+function splitAll(){snapshot();state.visualNodes.forEach(n=>n.split=true);renderVisual();toast("All components separated")}
+function assembleAll(){snapshot();state.visualNodes.forEach(n=>n.split=false);renderVisual();toast("All components reassembled")}
+function runSelected(){if(!state.selected){toast("Select a component first");return}toast("Running selected: "+(state.visualNodes.find(n=>n.id===state.selected)?.name||"component"))}
+function runModel(){checkModel();setTimeout(()=>toast("Prototype run completed in workflow mode"),500)}
+function checkModel(){const missing=state.visualNodes.filter(n=>!state.connections.some(c=>c.from===n.id||c.to===n.id));$("checkList").innerHTML=missing.map(n=>`<div class="checkline warning">⚠ ${escapeHtml(n.name)} has no connection. Suggested action: connect it to another component.</div>`).join("")||"<div class='checkline ok'>✓ All components have at least one connection.</div>";$("checkSummary").textContent=missing.length?missing.length+" warning(s)":"✓ Connections OK";updateSimInfo()}
+function setTool(t){state.tool=t;document.querySelectorAll(".tool").forEach(b=>b.classList.toggle("active",b.dataset.tool===t));state.connectFrom=null;toast("Tool: "+t)}
+document.querySelectorAll(".tool").forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+function addLibraryToVisual(){showPage("library");toast("Choose Import on a component")}
+function importToVisual(name){syncVisualFromDesign();snapshot();const node={id:uid(),name,x:120+(state.visualNodes.length%3)*210,y:100+Math.floor(state.visualNodes.length/3)*110,rotation:0,split:false};state.visualNodes.push(node);showPage("visual");state.selected=node.id;renderVisual();toast(name+" imported into Visual Engine")}
+function renderDepartments(){const q=($("deptSearch").value||"").toLowerCase();$("departments").innerHTML=Object.keys(LIBRARY).filter(d=>d.toLowerCase().includes(q)).map(d=>`<div class="dept ${state.libDept===d?"active":""}" onclick="state.libDept='${esc(d)}';state.libCategory=null;renderDepartments();renderLibrary()"><b>${d}</b><div class="small">${Object.values(LIBRARY[d]).flat().length} components/tools</div></div>`).join("")}
+function renderLibrary(){const dept=LIBRARY[state.libDept]||{};let arr=[];Object.entries(dept).forEach(([cat,items])=>items.forEach(name=>arr.push({cat,name})));const q=($("libSearch").value||"").toLowerCase();arr=arr.filter(x=>!q||x.name.toLowerCase().includes(q)||x.cat.toLowerCase().includes(q));$("libCount").textContent=arr.length+" items";$("libraryGrid").innerHTML=arr.map(x=>`<div class="libitem"><div><span class="tag">${escapeHtml(x.cat)}</span><h3 style="margin:8px 0 0">${escapeHtml(x.name)}</h3></div><div class="row"><button onclick="importToDesign('${esc(x.name)}')">Design</button><button onclick="importToVisual('${esc(x.name)}')">Visual</button></div></div>`).join("")}
+function generateCode(){
+  const lang=$("language").value;
+  const nodes=state.visualNodes.map(n=>n.name);
+  const con=state.connections.map(c=>`${findName(c.from)} -> ${findName(c.to)} [${c.type}]`);
+  if(lang==="Python"){
+    const model={
+      name:state.name||"DAVID Prototype",
+      description:"Generated from current DAVID Visual Engine model",
+      components:nodes.map((name,i)=>({name,x:100+(i%4)*170,y:100+Math.floor(i/4)*110})),
+      connections:state.connections.map(c=>({from:findName(c.from),to:findName(c.to),type:c.type}))
+    };
+    $("codeEditor").value=pythonModelCode(model,"Generated from current Visual Engine model");
+    $("aiPlan").innerHTML="<b>DAVID plan:</b> Export the current Visual Engine graph as executable Python model data.";
+    return;
+  }
+  let code=`// DAVID generated prototype\n// Language: ${lang}\n\n// Components:\n// ${nodes.join(", ")}\n\n// Connections:\n// ${con.join("\n")||"// none yet"}\n\n`;
+  if(lang==="Java") code+="public class DavidPrototype {\n  public static void main(String[] args) {\n    System.out.println(\"DAVID prototype\");\n  }\n}";
+  else if(lang==="C"||lang==="C++") code+="#include <stdio.h>\nint main(){ printf(\"DAVID prototype running\\\\n\"); return 0; }";
+  else code+="function runPrototype(){\n  console.log('DAVID prototype running');\n}\nrunPrototype();";
+  $("codeEditor").value=code;
+  $("aiPlan").innerHTML="<b>DAVID plan:</b> Code generated from the current model graph. Python is the browser-runnable language in this version.";
+}
+
+function pythonModelCode(model,reason){
+  const payload=JSON.stringify(model,null,2);
+  return `# DAVID AI generated Python prototype
+# ${reason}
+# This program creates a structured prototype model and prints a
+# machine-readable result that DAVID can load into the Visual Engine.
+
+import json
+
+model = ${payload}
+
+print("DAVID_RUN_START")
+print(json.dumps(model))
+print("DAVID_RUN_END")
+`;
+}
+
+function aiInterpretPrompt(prompt){
+  const p=prompt.toLowerCase();
+  let type="generic prototype";
+  if(/\b(pcb|printed circuit|circuit board|nand|logic gate|resistor|capacitor|electronic|electronics|circuit)\b/.test(p)) type="pcb circuit";
+  else if(/\b(car|automobile|vehicle)\b/.test(p)) type="car / automobile";
+  else if(/\b(engine|motor)\b/.test(p)) type="engine / motor";
+  else if(/\b(aircraft|airplane|plane)\b/.test(p)) type="aircraft";
+  else if(/\b(rocket|spacecraft|satellite)\b/.test(p)) type="aerospace";
+  else if(/\b(pipeline|pipe|fluid)\b/.test(p)) type="pipeline / fluid system";
+  else if(/\b(building|bridge|civil|structure)\b/.test(p)) type="civil structure";
+
+  const known=[];
+  Object.values(LIBRARY).forEach(dept=>Object.values(dept).forEach(items=>items.forEach(name=>{
+    if(p.includes(name.toLowerCase()) && !known.includes(name)) known.push(name);
+  })));
+
+  let components=[];
+  if(type==="pcb circuit"){
+    components=["PCB Board"];
+    if(/\bnand\b/.test(p))components.push("NAND Gate");
+    if(/\bresistor/.test(p))components.push("Resistor");
+    if(/\bcapacitor/.test(p))components.push("Capacitor");
+    if(/\b(power|supply|battery|vcc|5v|9v|12v)\b/.test(p))components.push("Power Supply");
+    if(/\b(led|indicator)\b/.test(p))components.push("LED");
+    if(components.length===1)components.push("NAND Gate","Resistor","Capacitor");
+  }else if(type==="car / automobile") components=["Engine","Battery","Starter Motor","Fuel System","Cooling System","Exhaust System","Transmission","Wheels"];
+  else if(type==="engine / motor") components=["Engine Block","Crankshaft","Piston","Cylinder","Fuel System","Cooling System","Lubrication System","Exhaust"];
+  else if(type==="aircraft") components=["Fuselage","Wing","Engine","Fuel System","Landing Gear","Flight Control","Avionics"];
+  else if(type==="aerospace") components=["Structure","Engine","Fuel Tank","Guidance System","Control System","Payload","Power System"];
+  else if(type==="pipeline / fluid system") components=["Pump","Pipeline","Valve","Pressure Sensor","Flow Meter","Storage Tank"];
+  else if(type==="civil structure") components=["Foundation","Column","Beam","Slab","Structure"];
+  else {components=known.slice(0,10);if(!components.length)components=["Input","Controller","Process","Output"];}
+
+  known.forEach(n=>{if(!components.includes(n))components.push(n)});
+  components=components.slice(0,14);
+  const links=[];
+  for(let i=0;i<components.length-1;i++){
+    let typeName=type==="pcb circuit"?"Electrical":"Mechanical";
+    const pair=components[i]+" "+components[i+1];
+    if(/\b(battery|fuel|power|sensor|controller|signal|resistor|capacitor|nand|led|pcb)\b/i.test(pair))typeName="Electrical";
+    if(/\b(pipe|pump|valve|fluid|tank|cooling)\b/i.test(pair))typeName="Fluid";
+    links.push({from:components[i],to:components[i+1],type:typeName});
+  }
+  if(type==="pcb circuit" && components.includes("NAND Gate")){
+    // Conservative default pin map when the user does not provide exact pins.
+    const pins={"PCB Board":"Board: VCC/GND rails","NAND Gate":"Prototype default: 74HC00-style pin map — 1=A, 2=B, 3=Y, 7=GND, 14=VCC","Resistor":"Two terminals: A=signal/source side, B=load/return side","Capacitor":"Two terminals: A=filter/VCC side, B=GND/return side"};
+    return {type,components,links,summary:`Create a PCB circuit. NAND gate pin configuration was not specified, so DAVID applies a safe prototype-level default pin map and marks it for checking.`,pinInfo:pins};
+  }
+  return {type,components,links,summary:`Create a ${type} prototype with ${components.length} components and connect the system in a logical sequence.`};
+}
+
+function aiCreateFromPrompt(prompt){
+  prompt=(prompt||"").trim();
+  if(!prompt){toast("Enter a prototype request first");return}
+  $("aiCodePrompt").value=prompt;
+  $("language").value="Python";
+  $("aiPlan").className="guide ai-running";
+  $("aiPlan").innerHTML="<b>DAVID is thinking…</b> Understanding the request, selecting components and preparing the Python model.";
+  const plan=aiInterpretPrompt(prompt);
+  const model={
+    name:prompt.length>55?prompt.slice(0,55)+"…":prompt,
+    description:plan.summary,
+    components:plan.components.map((name,i)=>({name,x:90+(i%4)*165,y:85+Math.floor(i/4)*105,rotation:0,pinInfo:plan.pinInfo?.[name]||null})),
+    connections:plan.links
+  };
+  $("codeEditor").value=pythonModelCode(model,"Prompt: "+prompt.replace(/\n/g," "));
+  $("aiPlan").className="guide ai-success";
+  $("aiPlan").innerHTML=`<b>DAVID plan ready.</b><br>${escapeHtml(plan.summary)}<br><span class="small">Components selected: ${plan.components.map(escapeHtml).join(", ")}</span>`;
+  $("pythonOutput").textContent="Python code generated. Click “Run Python” to execute it and create the model.";
+  showPage("code");
+  toast("Python prototype code generated");
+}
+
+let pyodideInstance=null,pyodideLoading=null;
+async function getPyodide(){
+  if(pyodideInstance)return pyodideInstance;
+  if(pyodideLoading)return pyodideLoading;
+  if(typeof loadPyodide!=="function")throw new Error("Python runtime library did not load");
+  pyodideLoading=loadPyodide({
+    stdout:msg=>{$("pythonOutput").textContent+=msg+"\n"},
+    stderr:msg=>{$("pythonOutput").textContent+="ERROR: "+msg+"\n"}
+  }).then(x=>{pyodideInstance=x;return x});
+  return pyodideLoading;
+}
+function extractModelFromPythonOutput(output){
+  const a=output.indexOf("DAVID_RUN_START"),b=output.indexOf("DAVID_RUN_END");
+  if(a<0||b<0)return null;
+  return JSON.parse(output.slice(a+"DAVID_RUN_START".length,b).trim());
+}
+function applyGeneratedModel(model){
+  if(!model||!Array.isArray(model.components))throw new Error("Python did not return a valid DAVID model");
+  snapshot();
+  state.name=model.name||"AI Generated Model";
+  state.page=0;
+  state.visualNodes=model.components.map((c,i)=>({id:uid(),name:c.name||("Component "+(i+1)),x:Number(c.x)||90+(i%4)*165,y:Number(c.y)||85+Math.floor(i/4)*105,rotation:Number(c.rotation)||0,split:false,color:c.color||null,pinInfo:c.pinInfo||null}));
+  state.pages=[{name:"AI Generated Model",nodes:state.visualNodes.map(n=>({...n}))}];
+  const byName=new Map(state.visualNodes.map(n=>[normalizeName(n.name),n]));
+  state.connections=[];
+  (model.connections||[]).forEach(c=>{
+    const from=byName.get(normalizeName(c.from)),to=byName.get(normalizeName(c.to));
+    if(from&&to&&from.id!==to.id)state.connections.push({id:uid(),from:from.id,to:to.id,type:c.type||"Generic"});
+  });
+  state.selected=state.visualNodes[0]?.id||null;
+  $("modelName").value=state.name;
+  renderAll();
+  showPage("visual");
+  toast("AI-generated model created in Visual Engine");
+}
+async function runGeneratedPython(){
+  const code=$("codeEditor").value.trim();
+  if(!code){toast("There is no Python code to run");return}
+  if($("language").value!=="Python"){toast("Select Python before running code");return}
+  $("pythonOutput").textContent="Starting Python runtime…\n";
+  $("pythonStatus").className="guide ai-running";
+  $("pythonStatus").textContent="Running generated Python inside the browser runtime…";
+  try{
+    await getPyodide();
+    await pyodideInstance.runPythonAsync(code);
+    const output=$("pythonOutput").textContent;
+    const model=extractModelFromPythonOutput(output);
+    if(model){
+      applyGeneratedModel(model);
+      $("pythonStatus").className="guide ai-success";
+      $("pythonStatus").innerHTML="<b>Run successful.</b> Python returned a DAVID model and the Visual Engine was updated.";
+    }else{
+      $("pythonStatus").className="guide";
+      $("pythonStatus").textContent="Python finished, but it did not return a DAVID model marker. Output is shown above.";
+    }
+  }catch(err){
+    $("pythonStatus").className="guide ai-error";
+    $("pythonStatus").textContent="Python execution failed: "+err.message;
+    $("pythonOutput").textContent+="\nExecution error: "+err.message;
+  }
+}
+async function createModelFromGeneratedCode(){await runGeneratedPython();}
+function copyCode(){navigator.clipboard?.writeText($("codeEditor").value);toast("Code copied")}
+function updateSimInfo(){$("simComponents").textContent=state.visualNodes.length+" component(s)";$("simConnections").textContent=state.connections.length+" connection(s)"}
+function runSimulation(){prepareSimulationFromDesign();checkModel();$("simLog").textContent="DAVID simulation workflow started...\nImported current Design model into Simulation.\n";$("simBar").style.width="0%";let p=0;const logs=["Loading design model","Checking components and inferred pins","Checking connection graph","Checking unconnected components","Preparing simulation interface","Test complete"];const timer=setInterval(()=>{p+=20;$("simBar").style.width=p+"%";$("simLog").textContent+=logs[Math.min(p/20-1,logs.length-1)]+" ✓\n";if(p>=100){clearInterval(timer);$("simLog").textContent+="\nResult: prototype simulation workflow completed.\nNote: this front-end performs structural/prototype checks; it is not a physical circuit solver.";toast("Simulation test completed")}},350)}
+function cadAdd(type){const s=$("cadSvg"),g=document.createElementNS("http://www.w3.org/2000/svg","g");const x=80+Math.random()*500,y=80+Math.random()*330;if(type==="rect"||type==="beam"||type==="column"){const r=document.createElementNS("http://www.w3.org/2000/svg","rect");r.setAttribute("x",x);r.setAttribute("y",y);r.setAttribute("width",type==="column"?45:150);r.setAttribute("height",type==="column"?150:55);r.setAttribute("fill","#183451");r.setAttribute("stroke","#64b5ff");g.appendChild(r)}else if(type==="circle"){const c=document.createElementNS("http://www.w3.org/2000/svg","circle");c.setAttribute("cx",x);c.setAttribute("cy",y);c.setAttribute("r",45);c.setAttribute("fill","#183451");c.setAttribute("stroke","#64b5ff");g.appendChild(c)}else{const l=document.createElementNS("http://www.w3.org/2000/svg","line");l.setAttribute("x1",x);l.setAttribute("y1",y);l.setAttribute("x2",x+170);l.setAttribute("y2",y+70);l.setAttribute("stroke","#64b5ff");l.setAttribute("stroke-width","5");g.appendChild(l)}s.appendChild(g)}
+function cadClear(){$("cadSvg").innerHTML=""}
+function cadAI(){if(!$("cadSvg").children.length){cadAdd("rect");cadAdd("circle");cadAdd("line")}toast("AI refinement preview applied")}
+function rememberCommand(text){
+  const t=text.trim();
+  if(!t)return;
+  state.voiceHistory.unshift({text:t,time:new Date().toLocaleTimeString()});
+  state.voiceHistory=state.voiceHistory.slice(0,30);
+  const terms=t.toLowerCase().match(/[a-z][a-z0-9+-]{2,}/g)||[];
+  state.learnedTerms=[...new Set([...state.learnedTerms,...terms])].slice(-100);
+}
+function normalizeName(s){
+  return s.toLowerCase().replace(/[^\w+.-]+/g," ").trim();
+}
+function findVisualByWords(words){
+  const q=normalizeName(words);
+  return state.visualNodes.find(n=>normalizeName(n.name)===q) ||
+         state.visualNodes.find(n=>normalizeName(n.name).includes(q)||q.includes(normalizeName(n.name)));
+}
+function ensureVisualComponent(name){
+  syncVisualFromDesign();
+  let n=findVisualByWords(name);
+  if(!n){
+    snapshot();
+    n={id:uid(),name:name.trim(),x:120+(state.visualNodes.length%4)*170,y:90+Math.floor(state.visualNodes.length/4)*100,rotation:0,split:false};
+    state.visualNodes.push(n);
+  }
+  return n;
+}
+function connectByNames(aName,bName,type="Electrical"){
+  const a=ensureVisualComponent(aName),b=ensureVisualComponent(bName);
+  if(a.id===b.id)return;
+  if(!state.connections.some(c=>(c.from===a.id&&c.to===b.id)||(c.from===b.id&&c.to===a.id))){
+    snapshot();state.connections.push({id:uid(),from:a.id,to:b.id,type});
+  }
+}
+function addComponentsFromLibrary(text){
+  const low=text.toLowerCase(); let added=[];
+  Object.values(LIBRARY).forEach(dept=>Object.values(dept).forEach(items=>items.forEach(name=>{
+    if(low.includes(name.toLowerCase()) && !added.some(x=>x.toLowerCase()===name.toLowerCase())) added.push(name);
+  })));
+  added.slice(0,12).forEach(name=>ensureVisualComponent(name));
+  return added.slice(0,12);
+}
+function selectByVoice(name){
+  const n=findVisualByWords(name);
+  if(n){state.selected=n.id;showPage("visual");renderVisual();toast("Selected "+n.name);return true}
+  return false;
+}
+function splitNext(){
+  const n=state.visualNodes.find(x=>!x.split);
+  if(n){snapshot();n.split=true;state.selected=n.id;renderVisual();toast("Split: "+n.name);return true}
+  return false;
+}
+function activeDesignPage(){return document.getElementById("design")?.classList.contains("active");}
+function ensureDesignComponent(name){
+  const page=state.pages[state.page]; if(!page)return null;
+  let n=page.nodes.find(x=>normalizeName(x.name)===normalizeName(name));
+  if(!n){snapshot();n={id:uid(),name,x:80+(page.nodes.length%4)*165,y:80+Math.floor(page.nodes.length/4)*105,rotation:0,split:false};page.nodes.push(n);}
+  return n;
+}
+function importElectronicsToDesign(text){
+  const l=text.toLowerCase();
+  const wanted=[];
+  if(/\\bresistor\\b/.test(l))wanted.push("Resistor");
+  if(/\\bcapacitor(s)?\\b/.test(l))wanted.push("Capacitor");
+  if(/\\binductor\\b/.test(l))wanted.push("Inductor");
+  if(/\\bdiode\\b/.test(l))wanted.push("Diode");
+  if(/\\bled\\b/.test(l))wanted.push("LED");
+  if(/\\btransistor\\b/.test(l))wanted.push("Transistor");
+  if(/\\bnand\\b/.test(l))wanted.push("NAND Gate");
+  if(/\\bpcb\\b/.test(l) && !state.pages[state.page].nodes.some(n=>/pcb/i.test(n.name)))wanted.unshift("PCB Board");
+  if(!wanted.length){toast("Tell DAVID which electronic components to import");return false;}
+  wanted.forEach(ensureDesignComponent);
+  // Keep Design and Visual Engine synchronized after every voice import.
+  state.pages[state.page].nodes.forEach((dn,i)=>{
+    let vn=state.visualNodes.find(x=>x.id===dn.id||normalizeName(x.name)===normalizeName(dn.name));
+    if(!vn){vn={...dn,id:dn.id||uid(),x:dn.x||80+(i%4)*165,y:dn.y||80+Math.floor(i/4)*105};state.visualNodes.push(vn);}
+    dn.id=vn.id;
+  });
+  renderDesign(); renderVisual();
+  toast("DAVID imported: "+wanted.join(", ")); return true;
+}
+function setModelColor(command){
+  const colors={red:"#ff4d67",blue:"#4da6ff",green:"#39d98a",yellow:"#ffd35a",orange:"#ff9a4d",purple:"#b77aff",cyan:"#57e8ff",white:"#edf5ff",pink:"#ff72c7"};
+  const m=command.toLowerCase().match(/\\b(red|blue|green|yellow|orange|purple|cyan|white|pink)\\b/); if(!m)return false;
+  const color=colors[m[1]], all=/\\b(all|everything|every component)\\b/.test(command.toLowerCase());
+  const target=command.match(/\\b(?:color|colour)\\s+(?:the\\s+)?(.+?)\\s+(?:red|blue|green|yellow|orange|purple|cyan|white|pink)\\b/i);
+  let nodes=all?state.visualNodes:[];
+  if(!all){const q=target?target[1]:"";const n=q&&findVisualByWords(q);if(n)nodes=[n];else if(state.selected)nodes=state.visualNodes.filter(x=>x.id===state.selected);}
+  if(!nodes.length)nodes=state.visualNodes;
+  snapshot();nodes.forEach(n=>{n.color=color;state.pages.forEach(pg=>pg.nodes.filter(d=>d.id===n.id||normalizeName(d.name)===normalizeName(n.name)).forEach(d=>d.color=color));});renderAll();toast("DAVID applied "+m[1]+" colour");return true;
+}
+function prepareSimulationFromDesign(){
+  const designNodes=state.pages.flatMap(p=>p.nodes||[]);
+  if(designNodes.length){
+    state.visualNodes=designNodes.map((n,i)=>({...n,id:n.id||uid(),x:Number(n.x)||80+(i%4)*165,y:Number(n.y)||80+Math.floor(i/4)*105}));
+    // Keep existing valid connections; if the design has no wiring, create a prototype-level sequence.
+    const ids=new Set(state.visualNodes.map(n=>n.id));
+    state.connections=state.connections.filter(c=>ids.has(c.from)&&ids.has(c.to));
+    if(!state.connections.length && state.visualNodes.length>1){
+      state.connections=[]; for(let i=0;i<state.visualNodes.length-1;i++)state.connections.push({id:uid(),from:state.visualNodes[i].id,to:state.visualNodes[i+1].id,type:/resistor|capacitor|nand|led|pcb|power/i.test(state.visualNodes[i].name+state.visualNodes[i+1].name)?"Electrical":"Generic"});
+    }
+  }
+  renderAll();
+}
+function runDesignToSimulation(){
+  prepareSimulationFromDesign();
+  showPage("simulation");
+  setTimeout(()=>runSimulation(),120);
+}
+
+function voiceCommand(text){
+  const p=text.trim(),l=p.toLowerCase(); if(!p)return;
+  rememberCommand(p);
+  if(setModelColor(p))return;
+  if(/\\b(ready|ready now|ready to run|run it|start simulation|simulate|simulation|test the model)\\b/.test(l)){runDesignToSimulation();return;}
+  if(activeDesignPage() && /\\b(import|add|insert|place)\\b/.test(l) && /\\b(resistor|capacitor|inductor|diode|led|transistor|nand|electronic|electronics|pcb)\\b/.test(l)){importElectronicsToDesign(p);return;}
+  if(/\\b(create|generate|build|design|make)\\b/.test(l) && /\\b(code|python|model|prototype|engine|car|automobile|vehicle|aircraft|rocket|circuit|pcb|nand|pipeline|building|system)\\b/.test(l)){
+    aiCreateFromPrompt(p); return;
+  }
+  const added=addComponentsFromLibrary(p);
+  if(added.length){showPage(activeDesignPage()?"design":"visual");renderDesign();renderVisual();toast("DAVID added: "+added.join(", "));return;}
+  const connectMatch=l.match(/connect\\s+(.+?)\\s+(?:to|with|and)\\s+(.+?)(?:\\s+(?:using|as|type)\\s+(\\w+))?$/i);
+  if(connectMatch){connectByNames(connectMatch[1],connectMatch[2],connectMatch[3]||"Electrical");showPage("visual");renderVisual();toast("Connection created");return;}
+  const selectMatch=l.match(/(?:select|choose|pick)\\s+(.+)/i); if(selectMatch&&selectByVoice(selectMatch[1]))return;
+  if(/\\bundo\\b/.test(l)){undo();toast("Undo");return} if(/\\bredo\\b/.test(l)){redo();toast("Redo");return}
+  if(/\\b(split all|separate all|separate every)\\b/.test(l)){showPage("visual");splitAll();return}
+  if(/\\b(reassemble all|assemble all|join all)\\b/.test(l)){showPage("visual");assembleAll();return}
+  const splitMatch=l.match(/\\b(?:split|separate)\\s+(.+)/i); if(splitMatch){const n=findVisualByWords(splitMatch[1]);if(n){snapshot();n.split=true;state.selected=n.id;showPage("visual");renderVisual();toast("Split "+n.name);return}showPage("visual");splitNext();return}
+  const rotateMatch=l.match(/\\brotate\\s+(.+)/i); if(rotateMatch){const n=findVisualByWords(rotateMatch[1]);if(n){snapshot();n.rotation=(n.rotation||0)+15;state.selected=n.id;showPage("visual");renderVisual();toast("Rotated "+n.name);return}}
+  if(/\\b(check|validate)\\b/.test(l)){showPage("visual");checkModel();return}
+  if(/\\b(connect mode|wiring mode|wire mode)\\b/.test(l)){showPage("visual");setTool("connect");return}
+  if(/\\b(code|generate code)\\b/.test(l)){showPage("code");generateCode();return}
+  if(/\\b(drawing|draw|cad)\\b/.test(l)){showPage("cad");cadAI();return}
+  if(/\\b(library|components|component library)\\b/.test(l)){showPage("library");renderDepartments();renderLibrary();return}
+  if(added.length)return;
+  showPage("design");ensureDesignComponent(p.slice(0,55));renderDesign();toast("DAVID added the requested item to Design");
+}
+function handlePrompt(){const p=$("prompt").value.trim();if(!p)return;voiceCommand(p);$("prompt").value=""}
+
+let voiceRunToken=0;
+let voiceLastFinal="";
+let voiceLastFinalAt=0;
+let voiceCommandBusy=false;
+let gestureCandidate="";
+let gestureCandidateSince=0;
+let gestureLastExecuted="";
+let gestureLastExecutedAt=0;
+let gestureCooldownUntil=0;
+let gesturePrevPalm=null;
+let gestureSwipeAt=0;
+let drawing={enabled:false,mode:"pen",down:false,ctx:null,canvas:null,lastX:0,lastY:0};
+
+function setVoiceUI(mode,text="Say “David”"){
+  const b=$("micBtn"),s=$("wakeStatus");
+  if(b){b.classList.toggle("armed",state.micArmed);b.classList.toggle("listening",state.wakeActive);b.textContent=state.wakeActive?"🔴":"🎙️";}
+  if(s){s.className="wake-status"+(state.wakeActive?" active":state.micArmed?" command":"");s.innerHTML=state.wakeActive?"<b>DAVID listening</b>":state.micArmed?"Say <b>“David”</b>":"Click circle once";}
+  const vt=$("voiceTranscript");if(vt)vt.textContent=text||"";
+}
+function stopRecognition(){
+  const r=state.recognition;
+  state.recognition=null;
+  state.micListening=false;
+  if(r){r.__davidStopped=true;try{r.onend=null;r.onerror=null;r.onresult=null;r.stop()}catch(e){}}
+}
+function wakeDavid(){
+  state.wakeActive=true;
+  if(state.wakeTimer)clearTimeout(state.wakeTimer);
+  state.wakeTimer=setTimeout(()=>{state.wakeActive=false;setVoiceUI()},12000);
+  setVoiceUI(true,"DAVID is listening for one command...");
+  toast("DAVID activated — speak one command");
+}
+function normalizedSpeech(t){return (t||"").replace(/\s+/g," ").trim();}
+function processSpeechText(raw){
+  const t=normalizedSpeech(raw);if(!t)return;
+  const now=Date.now();
+  // Browser speech engines can emit the same final phrase more than once.
+  const key=t.toLowerCase();
+  if(key===voiceLastFinal && now-voiceLastFinalAt<2500)return;
+  voiceLastFinal=key;voiceLastFinalAt=now;
+
+  const wake=/\bdavid\b/i.test(t);
+  if(!state.wakeActive){
+    if(wake){
+      const command=t.replace(/\bdavid\b[,:]?/i,"").trim();
+      wakeDavid();
+      if(command)queueVoiceCommand(command);
+    }
+    return;
+  }
+  if(state.wakeTimer)clearTimeout(state.wakeTimer);
+  state.wakeTimer=setTimeout(()=>{state.wakeActive=false;setVoiceUI()},12000);
+  const command=t.replace(/^\s*david[,:]?\s*/i,"").trim();
+  if(command)queueVoiceCommand(command);
+}
+function queueVoiceCommand(command){
+  const t=normalizedSpeech(command);if(!t||voiceCommandBusy)return;
+  voiceCommandBusy=true;
+  const vt=$("voiceTranscript");if(vt)vt.textContent=t;
+  // A single final transcript produces exactly one command execution.
+  try{voiceCommand(t)}catch(e){toast("Voice command failed safely");console.error(e)}
+  setTimeout(()=>{voiceCommandBusy=false},650);
+}
+function createRecognition(){
+  const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!R)return null;
+  const token=++voiceRunToken;
+  const r=new R();
+  r.lang="en-IN";r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
+  r.__davidToken=token;
+  r.onresult=e=>{
+    if(r.__davidStopped||token!==voiceRunToken||state.recognition!==r)return;
+    let interim="",finalText="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const tx=normalizedSpeech(e.results[i][0].transcript);
+      if(e.results[i].isFinal)finalText+=(finalText?" ":"")+tx;else interim+=(interim?" ":"")+tx;
+    }
+    const vt=$("voiceTranscript");if(vt)vt.textContent=finalText||interim||"Listening for “David”...";
+    if(finalText)processSpeechText(finalText);
+  };
+  r.onend=()=>{
+    if(r.__davidStopped||token!==voiceRunToken||state.recognition!==r)return;
+    state.recognition=null;
+    // Restart only one recognizer, never create competing recognizers.
+    if(state.micArmed){setTimeout(()=>{if(state.micArmed&&token===voiceRunToken&&!state.recognition)startWakeRecognition()},350)}
+  };
+  r.onerror=e=>{
+    if(r.__davidStopped||token!==voiceRunToken)return;
+    if(e.error==="not-allowed"||e.error==="service-not-allowed"){
+      state.micArmed=false;state.wakeActive=false;stopRecognition();setVoiceUI();toast("Microphone permission is required");return;
+    }
+    // Do not call start() from onerror. onend owns the restart.
+  };
+  return r;
+}
+function toggleMic(){
+  if(state.micArmed){
+    state.micArmed=false;state.wakeActive=false;if(state.wakeTimer)clearTimeout(state.wakeTimer);
+    ++voiceRunToken;stopRecognition();setVoiceUI();toast("DAVID microphone OFF");return;
+  }
+  if(!window.SpeechRecognition&&!window.webkitSpeechRecognition){toast("Speech recognition is not supported in this browser");return;}
+  state.micArmed=true;state.micListening=true;setVoiceUI(true,"Listening for “David”...");startWakeRecognition();toast("Microphone ON — say “David” once");
+}
+function startWakeRecognition(){
+  if(!state.micArmed||state.recognition)return;
+  const r=createRecognition();if(!r)return;
+  state.recognition=r;
+  try{r.start()}catch(e){state.recognition=null;setTimeout(()=>{if(state.micArmed&&!state.recognition)startWakeRecognition()},600)}
+}
+
+function fingerCount(lm){
+  // More stable finger test: each fingertip must be above its PIP and reasonably separated.
+  const tips=[8,12,16,20],pips=[6,10,14,18];let c=0;
+  tips.forEach((t,i)=>{if(lm[t].y<lm[pips[i]].y-0.025)c++});
+  const thumbOpen=Math.abs(lm[4].x-lm[2].x)>0.095 && Math.abs(lm[4].y-lm[2].y)>0.02;
+  if(thumbOpen)c++;
+  return c;
+}
+function nearestVisualFromHand(x,y){
+  const c=$("visualCanvas");if(!c||!state.visualNodes.length)return null;
+  const r=c.getBoundingClientRect();const tx=(1-x)*r.width,ty=y*r.height;let best=null,bd=Infinity;
+  state.visualNodes.forEach(n=>{const d=Math.hypot((n.x+55)-tx,(n.y+25)-ty);if(d<bd){bd=d;best=n}});
+  return best;
+}
+function stableGesture(name){
+  const now=performance.now();
+  if(name!==gestureCandidate){gestureCandidate=name;gestureCandidateSince=now;return false;}
+  if(now-gestureCandidateSince<450)return false;
+  if(now<gestureCooldownUntil)return false;
+  if(name===gestureLastExecuted && now-gestureLastExecutedAt<1200)return false;
+  return true;
+}
+function executeStableGesture(name,lm){
+  const now=performance.now();gestureLastExecuted=name;gestureLastExecutedAt=now;gestureCooldownUntil=now+850;
+  if(name==="FIST"){assembleAll();setGestureText("✊ Closed hand → Reassemble all");return}
+  if(name==="ONE"){
+    const n=nearestVisualFromHand(lm[8].x,lm[8].y);
+    if(n){snapshot();n.split=true;state.selected=n.id;renderVisual();setGestureText("☝️ One finger → Split/select "+n.name)}
+    else setGestureText("☝️ One finger → no component under pointer");return;
+  }
+  if(name==="TWO"){splitNext();setGestureText("✌️ Two fingers → Next component");return}
+  if(name==="FIVE"){splitAll();setGestureText("🖐️ Five fingers → Split all");return}
+}
+function gestureAction(lm){
+  const count=fingerCount(lm),now=performance.now(),palm=lm[9];
+  // Swipe is only recognized when the hand is open and the movement is large and fast.
+  if(palm){
+    if(gesturePrevPalm){
+      const dx=palm.x-gesturePrevPalm.x;
+      if(count>=4&&Math.abs(dx)>0.20&&now-gestureSwipeAt>1300){gestureSwipeAt=now;gestureCooldownUntil=now+1000;if(dx<0){undo();setGestureText("👈 Swipe left → Undo")}else{redo();setGestureText("👉 Swipe right → Redo")}gesturePrevPalm=palm;return;}
+    }
+    gesturePrevPalm=palm;
+  }
+  let name=count===0?"FIST":count===1?"ONE":count===2?"TWO":count>=5?"FIVE":"OTHER";
+  if(name!==gestureCandidate){gestureCandidate=name;gestureCandidateSince=now;return;}
+  if(name!=="OTHER"&&stableGesture(name))executeStableGesture(name,lm);
+  else if(name==="OTHER")setGestureText(count+" fingers detected — hold a defined gesture");
+}
+function setGestureText(t){const e=$("gestureState");if(e)e.textContent=t}
+async function startHandControl(){
+  if(!window.Hands||!window.Camera){toast("Gesture engine could not load. Check internet access and reload.");return}
+  if(state.handStream){toast("Hand control is already running");return}
+  const video=$("handVideo");
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false});
+    state.handStream=stream;video.srcObject=stream;
+    handsProcessor=new Hands({locateFile:file=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+    handsProcessor.setOptions({maxNumHands:1,modelComplexity:1,minDetectionConfidence:.72,minTrackingConfidence:.68});
+    handsProcessor.onResults(res=>{
+      if(res.multiHandLandmarks&&res.multiHandLandmarks[0])gestureAction(res.multiHandLandmarks[0]);
+      else {gesturePrevPalm=null;gestureCandidate="";setGestureText("Camera on • show one hand clearly");}
+    });
+    state.handCamera=new Camera(video,{onFrame:async()=>{if(handsProcessor)await handsProcessor.send({image:video})},width:640,height:480});
+    state.handCamera.start();setGestureText("Camera on • hold a gesture for 0.45 s");toast("Hand gesture control started");
+  }catch(e){stopHandControl();toast("Camera permission was not granted")}
+}
+function stopHandControl(){
+  if(state.handCamera?.stop)state.handCamera.stop();
+  if(state.handStream){state.handStream.getTracks().forEach(t=>t.stop());state.handStream=null}
+  if(handsProcessor)handsProcessor.close?.();handsProcessor=null;state.lastGestureX=null;gesturePrevPalm=null;gestureCandidate="";gestureLastExecuted="";
+  const v=$("handVideo");if(v)v.srcObject=null;setGestureText("Camera off • mouse/touch controls remain available");
+}
+
+function setupDrawing(){
+  const c=$("drawingCanvas"),wrap=$("cadCanvas");if(!c||!wrap)return;
+  drawing.canvas=c;drawing.ctx=c.getContext("2d");
+  const resize=()=>{const old=c.width?c.toDataURL():null;const r=wrap.getBoundingClientRect();c.width=Math.max(1,Math.floor(r.width));c.height=Math.max(1,Math.floor(r.height));if(old){const im=new Image();im.onload=()=>drawing.ctx.drawImage(im,0,0,c.width,c.height);im.src=old;}};
+  resize();window.addEventListener("resize",resize);
+  c.addEventListener("pointerdown",e=>{if(!drawing.enabled)return;drawing.down=true;c.setPointerCapture?.(e.pointerId);const r=c.getBoundingClientRect();drawing.lastX=e.clientX-r.left;drawing.lastY=e.clientY-r.top;drawing.ctx.beginPath();drawing.ctx.moveTo(drawing.lastX,drawing.lastY)});
+  c.addEventListener("pointermove",e=>{if(!drawing.enabled||!drawing.down)return;const r=c.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;const ctx=drawing.ctx;ctx.lineCap="round";ctx.lineJoin="round";ctx.lineWidth=drawing.mode==="eraser"?22:4;ctx.globalCompositeOperation=drawing.mode==="eraser"?"destination-out":"source-over";ctx.strokeStyle="#57e8ff";ctx.lineTo(x,y);ctx.stroke();drawing.lastX=x;drawing.lastY=y});
+  ["pointerup","pointercancel","pointerleave"].forEach(ev=>c.addEventListener(ev,()=>{drawing.down=false}));
+}
+function toggleDrawing(){drawing.enabled=!drawing.enabled;const w=$("cadCanvas"),b=$("drawToggle"),s=$("drawStatus");w.classList.toggle("drawing-on",drawing.enabled);b.textContent=drawing.enabled?"🛑 Disable Drawing":"✏️ Enable Drawing";s.textContent=drawing.enabled?"Drawing ON — draw anywhere in the central canvas":"Drawing OFF";if(drawing.enabled)showPage("cad")}
+function setDrawMode(mode){drawing.mode=mode;toast(mode==="pen"?"Pen selected":"Eraser selected")}
+function clearDrawing(){if(drawing.ctx&&drawing.canvas)drawing.ctx.clearRect(0,0,drawing.canvas.width,drawing.canvas.height);toast("Drawing cleared")}
+function downloadDrawing(){if(!drawing.canvas)return;const a=document.createElement("a");a.href=drawing.canvas.toDataURL("image/png");a.download="DAVID_AI_drawing.png";a.click();toast("Drawing saved as PNG")}
+function initDrawing(){setupDrawing()}
+
+async function aiAnalyzeSplit(){
+  showPage("visual");
+  const btn=[...document.querySelectorAll("button")].find(b=>b.textContent.includes("AI Analyze & Split"));
+  if(btn)btn.disabled=true;
+  try{
+    const payload={model:{name:state.name,components:state.visualNodes.map(n=>({name:n.name,x:n.x,y:n.y,rotation:n.rotation,split:n.split,pinInfo:n.pinInfo||null})),connections:state.connections.map(c=>({from:findName(c.from),to:findName(c.to),type:c.type}))}};
+    const r=await fetch("/api/analyze-split",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(d.error||"AI service request failed");
+    const parts=Array.isArray(d.parts)?d.parts:[];if(!parts.length)throw new Error("AI returned no split parts");
+    snapshot();
+    parts.forEach((part,i)=>{const n=state.visualNodes.find(x=>normalizeName(x.name)===normalizeName(part.name));if(n){n.split=true;if(Number.isFinite(part.x))n.x=part.x;if(Number.isFinite(part.y))n.y=part.y;n.rotation=Number.isFinite(part.rotation)?part.rotation:n.rotation;}});
+    renderVisual();toast("AI analysis completed — components split once");
+    const lc=$("learnedCommands");if(lc)lc.innerHTML="<b>AI Analyze:</b> "+escapeHtml(d.summary||"Analysis completed.");
+  }catch(e){
+    // Never pretend AI is available. Give the real reason and leave the model unchanged.
+    toast("AI Analyze unavailable: "+e.message);
+    const lc=$("learnedCommands");if(lc)lc.innerHTML="<b>AI Analyze status:</b> "+escapeHtml(e.message)+". Check that the deployed /api/analyze-split backend has an API key.";
+  }finally{if(btn)btn.disabled=false}
+}
+async function aiSplitSelected(){
+  if(!state.selected){toast("Select a component first");return}
+  const n=state.visualNodes.find(x=>x.id===state.selected);if(!n)return;
+  snapshot();n.split=true;renderVisual();toast("Selected component split");
+}
+
+function renderAll(){renderPages();renderDesign();renderVisual();renderDepartments();renderLibrary();updateSimInfo()}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function escapeAttr(s){return escapeHtml(s)}
+function esc(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'")}
+$("modelName").addEventListener("change",()=>state.name=$("modelName").value);
+$("modelVersion").addEventListener("change",()=>state.version=$("modelVersion").value);
+window.addEventListener("resize",drawWires);
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="z"){e.preventDefault();undo()}if((e.ctrlKey||e.metaKey)&&e.key==="y"){e.preventDefault();redo()}});
+
+renderAll();
+initDrawing();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name":"david-ai-stabilized",
+  "version":"4.0.0",
+  "private":true,
+  "type":"module",
+  "engines":{"node":">=20"}
+}
